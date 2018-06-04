@@ -1,4 +1,3 @@
-// The package neatns contains Novelty Search implementation for NEAT method of ANN's evolving
 package neatns
 
 import (
@@ -12,4 +11,9 @@ type NoveltyItem struct {
 	genome    *genetics.Genome
 	// The phenotype of novel item
 	phenotype *network.Network
+
+	// The flag to indicate whether item was added to archive
+	added     bool
+	// The generation when item was added to archive
+	generation int
 }
