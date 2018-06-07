@@ -62,11 +62,37 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 	}
 }
 
+func TestNoveltyArchive_addNoveltyItem(t *testing.T) {
+	archive := NewNoveltyArchive(1.0, nil)
+	gen, err := genetics.ReadGenome(strings.NewReader(gnome_str), 1)
+	if err != nil {
+		t.Error(err)
+	}
+	org := fillOrganismData(genetics.NewOrganism(0.1, gen, 1), 0.0)
+
+	// test add novelty item
+	item := org.Data.Value.(NoveltyItem)
+	archive.addNoveltyItem(item)
+
+	if len(archive.NovelItems) != 1 {
+		t.Errorf("len(archive.NovelItems) != 1, found: %d\n", len(archive.NovelItems))
+	}
+
+	if archive.NovelItems[0].added == false {
+		t.Error("item.added == false")
+	}
+
+	if archive.NovelItems[0].Generation != archive.Generation {
+		t.Error("item.Generation != archive.Generation")
+	}
+
+	if archive.itemsAddedInGeneration != 1 {
+		t.Error("archive.itemsAddedInGeneration != 1")
+	}
+}
 
 func fillOrganismData(org *genetics.Organism, novelty float64) *genetics.Organism{
 	ni := NoveltyItem{
-		genome:org.Genotype,
-		phenotype:org.Phenotype,
 		Generation:org.Generation,
 		Fitness:org.Fitness,
 		Novelty:novelty,

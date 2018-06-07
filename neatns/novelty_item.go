@@ -1,16 +1,7 @@
 package neatns
 
-import (
-	"github.com/yaricom/goNEAT/neat/genetics"
-	"github.com/yaricom/goNEAT/neat/network"
-)
-
 // The data holder for novel item's genome and phenotype
 type NoveltyItem struct {
-	// The genome of novel item
-	genome     *genetics.Genome
-	// The phenotype of novel item
-	phenotype  *network.Network
 
 	// The flag to indicate whether item was added to archive
 	added      bool
@@ -21,10 +12,32 @@ type NoveltyItem struct {
 	Fitness    float64
 	// The novelty of this item
 	Novelty    float64
+	// The item's age
+	Age        float64
+}
+
+// the structure to hold distance between two items
+type ItemsDistance struct {
+	distance float64
+	from, to NoveltyItem
+}
+
+// The sortable list of distances between two items
+type ItemsDistances []ItemsDistance
+
+func (f ItemsDistances) Len() int {
+	return len(f)
+}
+func (f ItemsDistances) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
+func (f ItemsDistances) Less(i, j int) bool {
+	return f[i].distance < f[j].distance
 }
 
 // The sortable list of novelty items by fitness
-type NoveltyItemsByFitness []*NoveltyItem
+type NoveltyItemsByFitness []NoveltyItem
+
 func (f NoveltyItemsByFitness) Len() int {
 	return len(f)
 }
