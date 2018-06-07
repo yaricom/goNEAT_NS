@@ -78,6 +78,8 @@ func (a *NoveltyArchive) EvaluateIndividual(org *genetics.Organism, pop *genetic
 	// store found values to the item
 	item.Novelty = result
 	item.Generation = a.Generation
+
+	org.Data.Value = item
 }
 
 // add novelty item to archive
