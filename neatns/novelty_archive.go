@@ -58,7 +58,8 @@ func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive 
 	return &arch
 }
 
-// evaluate the novelty of a single individual organism within population
+// evaluate the novelty of a single individual organism within population and update its fitness (onlyFitness = true)
+// or store individual's novelty item into archive
 func (a *NoveltyArchive) EvaluateIndividual(org *genetics.Organism, pop *genetics.Population, onlyFitness bool) {
 	item := org.Data.Value.(NoveltyItem)
 	var result float64
@@ -80,6 +81,14 @@ func (a *NoveltyArchive) EvaluateIndividual(org *genetics.Organism, pop *genetic
 	item.Generation = a.Generation
 
 	org.Data.Value = item
+}
+
+// evaluate the novelty of the whole population and update organisms fitness (onlyFitness = true)
+// or store each population individual's novelty items into archive
+func (a *NoveltyArchive) EvaluatePopulation(pop *genetics.Population, onlyFitness bool) {
+	for _, o := range pop.Organisms {
+		a.EvaluateIndividual(o, pop, onlyFitness)
+	}
 }
 
 // add novelty item to archive

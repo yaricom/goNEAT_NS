@@ -151,6 +151,49 @@ func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
 	}
 }
 
+func TestNoveltyArchive_EvaluatePopulation(t *testing.T) {
+	rand.Seed(42)
+	in, out, nmax := 3, 2, 5
+	recurrent := false
+	link_prob := 0.5
+	conf := neat.NeatContext{
+		CompatThreshold:0.5,
+		PopSize:10,
+	}
+	pop, err := genetics.NewPopulationRandom(in, out, nmax, recurrent, link_prob, &conf)
+	if err != nil {
+		t.Error(err)
+	}
+	if pop == nil {
+		t.Error("pop == nil")
+	}
+
+	for i := 0; i < len(pop.Organisms); i++ {
+		pop.Organisms[i].Fitness = 0.1 * (1.0 + float64(i))
+		fillOrganismData(pop.Organisms[i], 0.1 * (1.0 + float64(i)))
+	}
+
+	metric := func(x, y *NoveltyItem) float64 {
+		return (x.Fitness - y.Fitness) * (x.Fitness - y.Fitness)
+	}
+	archive := NewNoveltyArchive(0.1, metric)
+	archive.Generation = 2
+
+	// test update fitness scores
+	archive.EvaluatePopulation(pop, true)
+	for i := 0; i < len(pop.Organisms); i++ {
+		if pop.Organisms[i].Fitness == 0.1 * (1.0 + float64(i)) {
+			t.Errorf("Organism #%d fitness should be unpdated\n", i)
+		}
+	}
+
+	// test add to archive
+	archive.EvaluatePopulation(pop, false)
+	if len(archive.NovelItems) != 3 {
+		t.Errorf("NovelItems count in archive expected: %d, but was: %d\n", 3, len(archive.NovelItems))
+	}
+}
+
 func fillOrganismData(org *genetics.Organism, novelty float64) *genetics.Organism{
 	ni := NoveltyItem{
 		Generation:org.Generation,
