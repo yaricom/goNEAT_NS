@@ -4,6 +4,8 @@ import (
 	"testing"
 	"github.com/yaricom/goNEAT/neat/genetics"
 	"strings"
+	"github.com/yaricom/goNEAT/neat"
+	"math/rand"
 )
 
 const gnome_str = "genomestart 1\n" +
@@ -72,7 +74,7 @@ func TestNoveltyArchive_addNoveltyItem(t *testing.T) {
 
 	// test add novelty item
 	item := org.Data.Value.(NoveltyItem)
-	archive.addNoveltyItem(item)
+	archive.addNoveltyItem(&item)
 
 	if len(archive.NovelItems) != 1 {
 		t.Errorf("len(archive.NovelItems) != 1, found: %d\n", len(archive.NovelItems))
@@ -88,6 +90,64 @@ func TestNoveltyArchive_addNoveltyItem(t *testing.T) {
 
 	if archive.itemsAddedInGeneration != 1 {
 		t.Error("archive.itemsAddedInGeneration != 1")
+	}
+}
+
+func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
+	rand.Seed(42)
+	in, out, nmax := 3, 2, 5
+	recurrent := false
+	link_prob := 0.5
+	conf := neat.NeatContext{
+		CompatThreshold:0.5,
+		PopSize:10,
+	}
+	pop, err := genetics.NewPopulationRandom(in, out, nmax, recurrent, link_prob, &conf)
+	if err != nil {
+		t.Error(err)
+	}
+	if pop == nil {
+		t.Error("pop == nil")
+	}
+
+	for i := 0; i < len(pop.Organisms); i++ {
+		pop.Organisms[i].Fitness = 0.1 * (1.0 + float64(i))
+		fillOrganismData(pop.Organisms[i], 0.1 * (1.0 + float64(i)))
+	}
+
+	metric := func(x, y *NoveltyItem) float64 {
+		return (x.Fitness - y.Fitness) * (x.Fitness - y.Fitness)
+	}
+	archive := NewNoveltyArchive(1.0, metric)
+	archive.Generation = 2
+
+	// test evaluate only in archive
+	org := pop.Organisms[0]
+	archive.EvaluateIndividual(org, pop, false)
+
+	if len(archive.NovelItems) != 1 {
+		t.Errorf("len(archive.NovelItems) != 1, found: %d\n", len(archive.NovelItems))
+	}
+
+	if archive.NovelItems[0].added == false {
+		t.Error("item.added == false")
+	}
+	item := org.Data.Value.(NoveltyItem)
+	if item.added == false {
+		t.Error("org.Data.Value.added == false")
+	}
+	if item.Generation != archive.Generation {
+		t.Error("item.Generation != archive.Generation")
+	}
+
+	// test evaluate in population as well
+	archive.EvaluateIndividual(org, pop, true)
+	if len(archive.NovelItems) != 1 {
+		t.Errorf("len(archive.NovelItems) != 1, found: %d\n", len(archive.NovelItems))
+	}
+
+	if org.Fitness == 0.1 {
+		t.Error("The organism fitness should be different from initial (0.1)")
 	}
 }
 
