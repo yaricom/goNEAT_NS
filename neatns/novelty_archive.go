@@ -16,7 +16,7 @@ const archiveSeedAmount = 1
 // currently in the novelty set
 type NoveltyArchive struct {
 	// the all the novel items we have found so far
-	NovelItems             []NoveltyItem
+	NovelItems             []*NoveltyItem
 	// the all novel items with fittest organisms associated found so far
 	FittestItems           NoveltyItemsByFitness
 
@@ -46,8 +46,8 @@ type NoveltyArchive struct {
 // Creates new instance of novelty archive
 func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive {
 	arch := NoveltyArchive{
-		NovelItems:make([]NoveltyItem, 0),
-		FittestItems:make([]NoveltyItem, 0),
+		NovelItems:make([]*NoveltyItem, 0),
+		FittestItems:make([]*NoveltyItem, 0),
 		noveltyMetric:metric,
 		neighbors:KNNNoveltyScore,
 		noveltyFloor:0.25,
@@ -64,13 +64,13 @@ func (a *NoveltyArchive) EvaluateIndividual(org *genetics.Organism, pop *genetic
 	var result float64
 	if onlyFitness {
 		// assign organism fitness according to average novelty within archive and population
-		result = a.noveltyAvgKnn(item, -1, pop)
+		result = a.noveltyAvgKnn(&item, -1, pop)
 		org.Fitness = result
 	} else {
 		// consider adding a point to archive based on dist to nearest neighbor
-		result = a.noveltyAvgKnn(item, 1, nil)
+		result = a.noveltyAvgKnn(&item, 1, nil)
 		if result > a.noveltyThreshold || len(a.NovelItems) < archiveSeedAmount {
-			a.addNoveltyItem(item)
+			a.addNoveltyItem(&item)
 			item.Age = 1.0
 		}
 	}
@@ -83,7 +83,7 @@ func (a *NoveltyArchive) EvaluateIndividual(org *genetics.Organism, pop *genetic
 }
 
 // add novelty item to archive
-func (a *NoveltyArchive) addNoveltyItem(i NoveltyItem) {
+func (a *NoveltyArchive) addNoveltyItem(i *NoveltyItem) {
 	i.added = true
 	i.Generation = a.Generation
 	a.NovelItems = append(a.NovelItems, i)
@@ -99,7 +99,7 @@ func (a *NoveltyArchive) updateFittestWithOrganism(org *genetics.Organism) error
 	if len(a.FittestItems) < fittestAllowedSize {
 		// store organism's novelty item into fittest
 		item := org.Data.Value.(NoveltyItem)
-		a.FittestItems = append(a.FittestItems, item)
+		a.FittestItems = append(a.FittestItems, &item)
 
 		// sort to have most fit first
 		sort.Sort(sort.Reverse(a.FittestItems))
@@ -108,13 +108,13 @@ func (a *NoveltyArchive) updateFittestWithOrganism(org *genetics.Organism) error
 		org_item := org.Data.Value.(NoveltyItem)
 		if org_item.Fitness > last_item.Fitness {
 			// store organism's novelty item into fittest
-			a.FittestItems = append(a.FittestItems, org_item)
+			a.FittestItems = append(a.FittestItems, &org_item)
 
 			// sort to have most fit first
 			sort.Sort(sort.Reverse(a.FittestItems))
 
 			// remove less fit item
-			items := make([]NoveltyItem, fittestAllowedSize)
+			items := make([]*NoveltyItem, fittestAllowedSize)
 			copy(items, a.FittestItems)
 			a.FittestItems = items
 		}
@@ -156,7 +156,7 @@ func (a *NoveltyArchive) endOfGeneration() {
 }
 
 // the K nearest neighbor novelty score calculation for given item within provided population if any
-func (a *NoveltyArchive) noveltyAvgKnn(item NoveltyItem, neigh int, pop *genetics.Population) float64 {
+func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neigh int, pop *genetics.Population) float64 {
 	var novelties ItemsDistances
 	if pop != nil {
 		novelties = a.mapNoveltyInPopulation(item, pop)
@@ -197,7 +197,7 @@ func (a *NoveltyArchive) noveltyAvgKnn(item NoveltyItem, neigh int, pop *genetic
 }
 
 // map the novelty metric across the archive against provided item
-func (a *NoveltyArchive) mapNovelty(item NoveltyItem) ItemsDistances {
+func (a *NoveltyArchive) mapNovelty(item *NoveltyItem) ItemsDistances {
 	novelties := make([]ItemsDistance, len(a.NovelItems))
 	for i := 0; i < len(a.NovelItems); i++ {
 		novelties[i] = ItemsDistance{
@@ -210,7 +210,7 @@ func (a *NoveltyArchive) mapNovelty(item NoveltyItem) ItemsDistances {
 }
 
 // map the novelty metric across the archive and the current population
-func (a *NoveltyArchive) mapNoveltyInPopulation(item NoveltyItem, pop *genetics.Population) ItemsDistances {
+func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics.Population) ItemsDistances {
 	novelties := make([]ItemsDistance, len(a.NovelItems) + len(pop.Organisms))
 	n_index := 0
 	for i := 0; i < len(a.NovelItems); i++ {
@@ -225,8 +225,8 @@ func (a *NoveltyArchive) mapNoveltyInPopulation(item NoveltyItem, pop *genetics.
 	for i := 0; i < len(pop.Organisms); i++ {
 		org_item := pop.Organisms[i].Data.Value.(NoveltyItem)
 		novelties[n_index] = ItemsDistance{
-			distance:a.noveltyMetric(org_item, item),
-			from:org_item,
+			distance:a.noveltyMetric(&org_item, item),
+			from:&org_item,
 			to:item,
 		}
 		n_index++

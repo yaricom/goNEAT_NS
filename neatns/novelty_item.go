@@ -19,7 +19,7 @@ type NoveltyItem struct {
 // the structure to hold distance between two items
 type ItemsDistance struct {
 	distance float64
-	from, to NoveltyItem
+	from, to *NoveltyItem
 }
 
 // The sortable list of distances between two items
@@ -36,7 +36,7 @@ func (f ItemsDistances) Less(i, j int) bool {
 }
 
 // The sortable list of novelty items by fitness
-type NoveltyItemsByFitness []NoveltyItem
+type NoveltyItemsByFitness []*NoveltyItem
 
 func (f NoveltyItemsByFitness) Len() int {
 	return len(f)

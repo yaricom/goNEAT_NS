@@ -6,4 +6,4 @@ const KNNNoveltyScore = 15
 
 // The novelty metric function type.
 // The function to compare two novelty items and return distance/difference between them
-type NoveltyMetric func(x, y NoveltyItem) float64
+type NoveltyMetric func(x, y *NoveltyItem) float64
