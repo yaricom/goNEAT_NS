@@ -2,7 +2,6 @@ package neatns
 
 // The data holder for novel item's genome and phenotype
 type NoveltyItem struct {
-
 	// The flag to indicate whether item was added to archive
 	added      bool
 	// The generation when item was added to archive
@@ -14,6 +13,9 @@ type NoveltyItem struct {
 	Novelty    float64
 	// The item's age
 	Age        float64
+
+	// The data associated with item
+	Data       [][]float64
 }
 
 // the structure to hold distance between two items
