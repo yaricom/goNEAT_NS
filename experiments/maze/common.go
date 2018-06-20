@@ -7,7 +7,11 @@ import (
 	"bufio"
 	"strings"
 	"fmt"
+	"errors"
 )
+
+// The maximal allowed speed for maze agent
+const maxAgentSpeed = 3.0
 
 // The simple point class
 type Point struct {
@@ -201,7 +205,7 @@ type Environment struct {
 }
 
 // Reads maze environment from reader
-func ReadEnvironment(ir io.Reader) *Environment {
+func ReadEnvironment(ir io.Reader) (*Environment, error) {
 	env := Environment{}
 	env.Hero = NewAgent()
 	env.Lines = make([]Line, 0)
@@ -238,18 +242,192 @@ func ReadEnvironment(ir io.Reader) *Environment {
 	}
 
 	// update sensors
-	env.updateRangefinders()
+	err := env.updateRangefinders()
+	if err != nil {
+		return nil, err
+	}
 	env.updateRadar()
 
-	return &env
+	return &env, nil
+}
+
+// create neural net inputs from maze agent sensors
+func (e *Environment) GetInputs() ([]float64, error) {
+	inputs := make([]float64, 20)
+	// bias
+	inputs[0] = 1.0
+
+	// range finders
+	i := 0
+	for ; i < len(e.Hero.RangeFinders); i++ {
+		inputs[1 + i] = e.Hero.RangeFinders[i] / e.Hero.RangeFinderRange
+		if math.IsNaN(inputs[1 + i]) {
+			return nil, errors.New("NAN in inputs from range finders")
+		}
+	}
+
+	// radar
+	for j := 0; j < len(e.Hero.Radar); j++ {
+		inputs[i + j] = e.Hero.Radar[j]
+		if math.IsNaN(inputs[i + j]) {
+			return nil, errors.New("NAN in inputs from radar")
+		}
+	}
+
+	return inputs, nil
+}
+
+// transform neural net outputs into angular velocity and speed
+func (e *Environment) ApplyOutputs(o1, o2 float64) error {
+	if math.IsNaN(o1) || math.IsNaN(o2) {
+		return errors.New("OUTPUT is NAN")
+	}
+
+	e.Hero.AngularVelocity += (o1 - 0.5)
+	e.Hero.Speed += (o2 - 0.5)
+
+	// constraints of speed & angular velocity
+	if e.Hero.Speed > maxAgentSpeed {
+		e.Hero.Speed = maxAgentSpeed
+	}
+	if e.Hero.Speed < -maxAgentSpeed {
+		e.Hero.Speed = -maxAgentSpeed
+	}
+	if e.Hero.AngularVelocity > maxAgentSpeed {
+		e.Hero.AngularVelocity = maxAgentSpeed
+	}
+	if e.Hero.AngularVelocity < -maxAgentSpeed {
+		e.Hero.AngularVelocity = -maxAgentSpeed
+	}
+
+	return nil
+}
+
+// Do one time step of the simulation
+func (e *Environment) Update() error {
+	if e.ExitFound {
+		return nil
+	}
+
+	// get horizontal and vertical velocity components
+	vx := math.Cos(e.Hero.Heading / 180.0 * math.Pi) * e.Hero.Speed
+	vy := math.Sin(e.Hero.Heading / 180.0 * math.Pi) * e.Hero.Speed
+
+	if math.IsNaN(vx) {
+		return errors.New("VX NAN")
+	}
+	if math.IsNaN(vy) {
+		return errors.New("VY NAN")
+	}
+
+	// Update agent heading
+	e.Hero.Heading += e.Hero.AngularVelocity
+	if math.IsNaN(e.Hero.AngularVelocity) {
+		return errors.New("HERO ANG VEL NAN")
+	}
+
+	if e.Hero.Heading > 360 {
+		e.Hero.Heading -= 360
+	}
+	if e.Hero.Heading < 0 {
+		e.Hero.Heading += 360
+	}
+
+	// Find next agent's location
+	newloc := Point{
+		X:vx + e.Hero.Location.X,
+		Y:vy + e.Hero.Location.Y,
+	}
+	if !e.testAgentCollision(newloc) {
+		e.Hero.Location.X = newloc.X
+		e.Hero.Location.Y = newloc.Y
+	}
+	err := e.updateRangefinders()
+	if err != nil {
+		return err
+	}
+	e.updateRadar()
+
+	return nil
 }
 
 // update rangefinder sensors
-func (e *Environment) updateRangefinders() {
+func (e *Environment) updateRangefinders() error {
+	// iterate through each sensor and find distance to maze lines with agent's range finder sensors
+	for i := 0; i < len(e.Hero.RangeFinderAngles); i++ {
+		// radians...
+		rad := e.Hero.RangeFinderAngles[i] / 180.0 * math.Pi
 
+		// project a point from the hero's location outwards
+		projection_point := Point{
+			X:e.Hero.Location.X + math.Cos(rad) * e.Hero.RangeFinderRange,
+			Y:e.Hero.Location.Y + math.Sin(rad) * e.Hero.RangeFinderRange,
+		}
+		// rotate the projection point by the hero's heading
+		projection_point.Rotate(e.Hero.Heading, e.Hero.Location)
+
+		// create a line segment from the hero's location to projected
+		projection_line := Line{
+			A:e.Hero.Location,
+			B:projection_point,
+		}
+
+		// set range to max by default
+		min_range := e.Hero.RangeFinderRange
+
+		// now test against the environment to see if we hit anything
+		for j := 0; j < len(e.Lines); j++ {
+			found, intersection := e.Lines[j].Intersection(projection_line)
+			if found {
+				// if so, then update the range to the distance
+				found_range := intersection.Distance(e.Hero.Location)
+
+				// we want the closest intersection
+				if found_range < min_range {
+					min_range = found_range
+				}
+			}
+		}
+
+		if math.IsNaN(min_range) {
+			return errors.New("RANGE is NAN")
+		}
+		e.Hero.RangeFinders[i] = min_range
+	}
+	return nil
 }
 
 // update radar sensors
 func (e *Environment) updateRadar() {
+	target := e.End
 
+	// rotate goal with respect to heading of agent
+	target.Rotate(-e.Hero.Heading, e.Hero.Location)
+
+	// translate with respect to location of agent
+	target.X -= e.Hero.Location.X
+	target.Y -= e.Hero.Location.Y
+
+	// what angle is the vector between target & agent
+	angle := target.Angle()
+
+	// fire the appropriate radar sensor
+	for i := 0; i < len(e.Hero.RadarAngles1); i++ {
+		e.Hero.Radar[i] = 0.0
+
+		if (angle >= e.Hero.RadarAngles1[i] && angle < e.Hero.RadarAngles2[i]) ||
+			(angle + 360.0 >= e.Hero.RadarAngles1[i] && angle + 360.0 < e.Hero.RadarAngles2[i]) {
+			e.Hero.Radar[i] = 1.0
+		}
+	}
+}
+
+// see if provided new location hits anything in maze
+func (e *Environment) testAgentCollision(loc Point) bool {
+	for j := 0; j < len(e.Lines); j++ {
+		if e.Lines[j].Distance(loc) < e.Hero.Radius {
+			return true
+		}
+	}
+	return false
 }
