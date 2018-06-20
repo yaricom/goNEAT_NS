@@ -4,6 +4,7 @@ import (
 	"testing"
 	"math"
 	"strings"
+	"os"
 )
 
 func TestPoint_Angle(t *testing.T) {
@@ -200,5 +201,53 @@ func TestReadLine(t *testing.T) {
 	}
 	if line.B.Y != 40 {
 		t.Error("line.B.Y != 40")
+	}
+}
+
+func TestReadEnvironment(t *testing.T) {
+	maze_config_path := "../../data/medium_maze.txt"
+
+	// open maze config file
+	maze_file, err := os.Open(maze_config_path)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	env := ReadEnvironment(maze_file)
+	if env.Hero.Location.X != 30 {
+		t.Error("env.Hero.Location.X != 30")
+	}
+	if env.Hero.Location.Y != 22 {
+		t.Error("env.Hero.Location.Y != 22")
+	}
+	if len(env.Lines) != 11 {
+		t.Error("len(env.Lines) != 11")
+	}
+	if env.End.X != 270 {
+		t.Error("env.End.X != 270")
+	}
+	if env.End.Y != 100 {
+		t.Error("env.End.Y != 100")
+	}
+
+	lines := []Line{
+		{Point{293, 7}, Point{289, 130}},
+		{Point{289, 130}, Point{6, 134}},
+		{Point{6, 134}, Point{8, 5}},
+		{Point{8, 5}, Point{292, 7}},
+		{Point{241, 130}, Point{58, 65}},
+		{Point{114, 7}, Point{73, 42}},
+		{Point{130, 91}, Point{107, 46}},
+		{Point{196, 8}, Point{139, 51}},
+		{Point{219, 122}, Point{182, 63}},
+		{Point{267, 9}, Point{214, 63}},
+		{Point{271, 129}, Point{237, 88}},
+	}
+
+	for i, l := range env.Lines {
+		if lines[i].A.X != l.A.X || lines[i].A.Y != l.A.Y || lines[i].B.X != l.B.X || lines[i].B.Y != l.B.Y {
+			t.Error("Wrong line found", l)
+		}
 	}
 }
