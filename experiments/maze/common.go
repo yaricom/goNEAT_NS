@@ -114,3 +114,54 @@ func (l Line) Distance(p Point) float64 {
 func (l Line) Length() float64 {
 	return l.A.Distance(l.B)
 }
+
+// The class for the maze navigator agent
+type Agent struct {
+	// The current location
+	Location          Point
+	// The heading direction in degrees
+	Heading           float64
+	// The speed of agent
+	Speed             float64
+	// The angular velocity
+	AngularVelocity   float64
+	// The radius of agent body
+	Radius            float64
+	// The maximal range of range finder sensors
+	RangeFinderRange  float64
+
+	// The angles of range finder sensors
+	RangeFinderAngles []float64
+	// The beginning angles for radar sensors
+	RadarAngles1      []float64
+	// The ending angles for radar sensors
+	RadarAngles2      []float64
+
+	// stores radar outputs
+	Radar             []float64
+	// stores rangefinder outputs
+	RangeFinders      []float64
+}
+
+// Creates new Agent with default settings
+func NewAgent() Agent {
+	agent := Agent{
+		Heading:0.0,
+		Speed:0.0,
+		AngularVelocity:0.0,
+		Radius:8.0,
+		RangeFinderRange:100.0,
+	}
+
+	// define the range finder sensors
+	agent.RangeFinderAngles = []float64{-90.0, -45.0, 0.0, 45.0, 90.0, -180.0}
+
+	// define the radar sensors
+	agent.RadarAngles1 = []float64{315.0, 45.0, 135.0, 225.0}
+	agent.RadarAngles2 = []float64{405.0, 135.0, 225.0, 315.0}
+
+	agent.RangeFinders = make([]float64, len(agent.RangeFinderAngles))
+	agent.Radar = make([]float64, len(agent.RadarAngles1))
+
+	return agent
+}
