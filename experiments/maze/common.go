@@ -198,7 +198,7 @@ type Environment struct {
 	// The maze line segments
 	Lines     []Line
 	// The maze exit - goal
-	End       Point
+	MazeExit  Point
 
 	// The flag to indicate if exit was found
 	ExitFound bool
@@ -228,7 +228,7 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 			fmt.Fscanf(lr, "%f", &env.Hero.Heading)
 
 		case 3:// read the maze exit location
-			env.End = ReadPoint(lr)
+			env.MazeExit = ReadPoint(lr)
 
 		default:
 			// read maze line segments
@@ -351,6 +351,18 @@ func (e *Environment) Update() error {
 	return nil
 }
 
+// used for fitness calculations based on distance of maze Agent to the target maze exit
+func (e *Environment) DistanceToExit() (float64, error) {
+	dist := e.Hero.Location.Distance(e.MazeExit)
+	if math.IsNaN(dist) {
+		return 500, errors.New("NAN Distance error...")
+	}
+	if dist < 5.0 {
+		e.ExitFound = true //if within 5 units, success!
+	}
+	return dist, nil
+}
+
 // update rangefinder sensors
 func (e *Environment) updateRangefinders() error {
 	// iterate through each sensor and find distance to maze lines with agent's range finder sensors
@@ -399,7 +411,7 @@ func (e *Environment) updateRangefinders() error {
 
 // update radar sensors
 func (e *Environment) updateRadar() {
-	target := e.End
+	target := e.MazeExit
 
 	// rotate goal with respect to heading of agent
 	target.Rotate(-e.Hero.Heading, e.Hero.Location)
@@ -430,4 +442,15 @@ func (e *Environment) testAgentCollision(loc Point) bool {
 		}
 	}
 	return false
+}
+
+// Stringer
+func (e *Environment) String() string {
+	str := fmt.Sprintf("MAZE\nHero at: %.1f, %.1f\n", e.Hero.Location.X, e.Hero.Location.Y)
+	str += fmt.Sprintf("Exit at: %.1f, %.1f\n", e.MazeExit.X, e.MazeExit.Y)
+	str += "Lines:\n"
+	for _, l := range e.Lines {
+		str += fmt.Sprintf("\t[%.1f, %.1f] -> [%.1f, %.1f]\n", l.A.X, l.A.Y, l.B.X, l.B.Y)
+	}
+	return str
 }

@@ -224,10 +224,10 @@ func TestReadEnvironment(t *testing.T) {
 	if len(env.Lines) != 11 {
 		t.Error("len(env.Lines) != 11")
 	}
-	if env.End.X != 270 {
+	if env.MazeExit.X != 270 {
 		t.Error("env.End.X != 270")
 	}
-	if env.End.Y != 100 {
+	if env.MazeExit.Y != 100 {
 		t.Error("env.End.Y != 100")
 	}
 
