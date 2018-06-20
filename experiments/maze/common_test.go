@@ -3,6 +3,7 @@ package maze
 import (
 	"testing"
 	"math"
+	"strings"
 )
 
 func TestPoint_Angle(t *testing.T) {
@@ -99,6 +100,19 @@ func TestPoint_Distance(t *testing.T) {
 	}
 }
 
+func TestReadPoint(t *testing.T) {
+	str := "10 20"
+	lr := strings.NewReader(str)
+
+	point := ReadPoint(lr)
+	if point.X != 10 {
+		t.Errorf("Point has wrong X: %f, expected: %f\n", point.X, 10)
+	}
+	if point.Y != 20 {
+		t.Errorf("Point has wrong Y: %f, expected: %f\n", point.Y, 20)
+	}
+}
+
 func TestLine_Intersection(t *testing.T) {
 	l1 := Line{
 		A:Point{1.0, 1.0},
@@ -167,5 +181,24 @@ func TestLine_Length(t *testing.T) {
 	length := l.Length()
 	if length != 4.0 {
 		t.Errorf("Wrong line length: %f, expected: %f\n", length, 4.0)
+	}
+}
+
+func TestReadLine(t *testing.T) {
+	str := "10 20 30 40"
+	lr := strings.NewReader(str)
+
+	line := ReadLine(lr)
+	if line.A.X != 10 {
+		t.Error("line.A.X != 10")
+	}
+	if line.A.Y != 20 {
+		t.Error("line.A.Y != 20")
+	}
+	if line.B.X != 30 {
+		t.Error("line.B.X != 30")
+	}
+	if line.B.Y != 40 {
+		t.Error("line.B.Y != 40")
 	}
 }

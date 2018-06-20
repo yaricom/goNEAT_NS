@@ -3,11 +3,23 @@ package maze
 
 import (
 	"math"
+	"io"
+	"bufio"
+	"strings"
+	"fmt"
 )
 
 // The simple point class
 type Point struct {
 	X, Y float64
+}
+
+// Reads Point from specified reader
+func ReadPoint(lr io.Reader) Point {
+	point := Point{}
+	fmt.Fscanf(lr, "%f %f", &point.X, &point.Y)
+
+	return point
 }
 
 // To determine angle in degrees of vector defined by (0,0)->This Point. The angle is from 0 to 360 degrees anti clockwise.
@@ -49,6 +61,15 @@ type Line struct {
 // To create new line
 func NewLine(a, b Point) Line {
 	return Line{A:a, B:b}
+}
+
+// Reads line from specified reader
+func ReadLine(lr io.Reader) Line {
+	a := Point{}
+	b := Point{}
+	fmt.Fscanf(lr, "%f %f %f %f", &a.X, &a.Y, &b.X, &b.Y)
+
+	return NewLine(a, b)
 }
 
 // To find midpoint of the line segment
@@ -164,4 +185,71 @@ func NewAgent() Agent {
 	agent.Radar = make([]float64, len(agent.RadarAngles1))
 
 	return agent
+}
+
+// The maze environment class
+type Environment struct {
+	// The maze navigating agent
+	Hero      Agent
+	// The maze line segments
+	Lines     []Line
+	// The maze exit - goal
+	End       Point
+
+	// The flag to indicate if exit was found
+	ExitFound bool
+}
+
+// Reads maze environment from reader
+func ReadEnvironment(ir io.Reader) *Environment {
+	env := Environment{}
+	env.Hero = NewAgent()
+	env.Lines = make([]Line, 0)
+
+	// Loop until file is finished, parsing each line
+	scanner := bufio.NewScanner(ir)
+	scanner.Split(bufio.ScanLines)
+	index, numLines := 0, 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		lr := strings.NewReader(line)
+		switch index {
+		case 0:// read in how many line segments
+			fmt.Fscanf(lr, "%d", &numLines)
+
+		case 1:// read initial agent's location
+			env.Hero.Location = ReadPoint(lr)
+
+		case 2:// read initial heading
+			fmt.Fscanf(lr, "%f", &env.Hero.Heading)
+
+		case 3:// read the maze exit location
+			env.End = ReadPoint(lr)
+
+		default:
+			// read maze line segments
+			if numLines > 0 {
+				env.Lines = append(env.Lines, ReadLine(lr))
+				numLines--
+			}
+		}
+
+		index++
+	}
+
+	// update sensors
+	env.updateRangefinders()
+	env.updateRadar()
+
+	return &env
+}
+
+// update rangefinder sensors
+func (e *Environment) updateRangefinders() {
+
+}
+
+// update radar sensors
+func (e *Environment) updateRadar() {
+
 }
