@@ -60,7 +60,7 @@ func mazeSimulationInit(env Environment, org *genetics.Organism) (*Environment, 
 		}
 	}
 
-	return &env
+	return &env, nil
 }
 
 // To execute a time step of the maze simulation evaluation within given Environment for provided Organism
@@ -103,5 +103,5 @@ func mazeSimulationStep(env *Environment, org *genetics.Organism) (float64, erro
 
 	fitness := 5.0 / dist
 
-	return fitness
+	return fitness, nil
 }
