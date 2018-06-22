@@ -4,6 +4,7 @@ import (
 	"testing"
 	"os"
 	"strings"
+	"math"
 )
 
 func TestPoint_Angle(t *testing.T) {
