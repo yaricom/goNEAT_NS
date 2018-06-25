@@ -15,7 +15,12 @@ type NoveltyItem struct {
 	Age        float64
 
 	// The data associated with item
-	Data       [][]float64
+	Data       []float64
+}
+
+// Creates new novelty item
+func NewNoveltyItem() *NoveltyItem {
+	return &NoveltyItem{Data:make([]float64, 0)}
 }
 
 // the structure to hold distance between two items
