@@ -193,14 +193,19 @@ func NewAgent() Agent {
 // The maze environment class
 type Environment struct {
 	// The maze navigating agent
-	Hero      Agent
+	Hero       Agent
 	// The maze line segments
-	Lines     []Line
+	Lines      []Line
 	// The maze exit - goal
-	MazeExit  Point
+	MazeExit   Point
 
 	// The flag to indicate if exit was found
-	ExitFound bool
+	ExitFound  bool
+
+	// The number of time steps to be executed during maze solving simulation
+	TimeSteps  int
+	// The sample step size to determine when to collect subsequent samples during simulation
+	SampleSize int
 }
 
 // Reads maze environment from reader
@@ -352,7 +357,7 @@ func (e *Environment) Update() error {
 }
 
 // used for fitness calculations based on distance of maze Agent to the target maze exit
-func (e *Environment) distanceToExit() (float64, error) {
+func (e *Environment) agentDistanceToExit() (float64, error) {
 	dist := e.Hero.Location.Distance(e.MazeExit)
 	if math.IsNaN(dist) {
 		return 500, errors.New("NAN Distance error...")
