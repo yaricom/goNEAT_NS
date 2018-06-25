@@ -5,7 +5,58 @@ import (
 	"fmt"
 	"github.com/yaricom/goNEAT/neat"
 	"github.com/yaricom/goNEAT/neat/genetics"
+	"github.com/yaricom/goNEAT_NS/neatns"
 )
+
+
+// To evaluate an individual organism within provided maze environment and to create corresponding novelty point
+func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *AgentRecord) (*neatns.NoveltyItem, error) {
+	n_item := neatns.NewNoveltyItem()
+
+	// initialize maze simulation's environment specific to the provided organism - this will be a copy
+	// of primordial environment provided
+	org_env := *env
+	org_env, err := mazeSimulationInit(org_env, org)
+	if err != nil {
+		return 0.0, err
+	}
+
+	// do specified amount of time steps emulations
+	for i := 0; i < org_env.TimeSteps; i++ {
+		err := mazeSimulationStep(&org_env, org)
+		if err != nil {
+			return 0.0, err
+		}
+		// store agent path points at given sample size
+		if (org_env.TimeSteps - i - 1) % org_env.SampleSize == 0 {
+			n_item.Data = append(n_item.Data, org_env.Hero.Location.X)
+			n_item.Data = append(n_item.Data, org_env.Hero.Location.Y)
+		}
+	}
+
+	// calculate fitness of an organism as closeness to target
+	fitness, err := org_env.agentDistanceToExit()
+	if err != nil {
+		neat.ErrorLog("failed to estimate organism fitness by its final distance to exit")
+		return 0.0, err
+	}
+	// normalize fitness value in range (0;1] and store it
+	fitness = 1 / (fitness + 1)
+	n_item.Fitness = fitness
+
+	// store final agent coordinates as organism's novelty characteristics
+	n_item.Data = append(n_item.Data, org_env.Hero.Location.X)
+	n_item.Data = append(n_item.Data, org_env.Hero.Location.Y)
+
+	if record != nil {
+		record.Fitness = fitness
+		record.X = org_env.Hero.Location.X
+		record.Y = org_env.Hero.Location.Y
+		record.GotExit = org_env.ExitFound
+	}
+
+	return n_item, nil
+}
 
 
 // To initialize the maze simulation within provided environment copy and for given organism.
@@ -64,44 +115,32 @@ func mazeSimulationInit(env Environment, org *genetics.Organism) (*Environment, 
 }
 
 // To execute a time step of the maze simulation evaluation within given Environment for provided Organism
-// Returns fitness value of evaluated organism
-func mazeSimulationStep(env *Environment, org *genetics.Organism) (float64, error) {
+func mazeSimulationStep(env *Environment, org *genetics.Organism) error {
 	// get simulation parameters as inputs to organism's network
 	inputs, err := env.GetInputs()
 	if err != nil {
-		return -1.0, err
+		return err
 	}
 	org.Phenotype.LoadSensors(inputs)
 	_, err = org.Phenotype.Activate()
 	if err != nil {
 		neat.ErrorLog("Failed to activate network")
-		return -1.0, err
+		return err
 	}
 
 	// use the net's outputs to change heading and velocity of maze agent
 	err = env.ApplyOutputs(org.Phenotype.Outputs[0].Activation, org.Phenotype.Outputs[1].Activation)
 	if err != nil {
 		neat.ErrorLog("Failed to apply outputs")
-		return -1.0, err
+		return err
 	}
 
 	// update the environment
 	err = env.Update()
 	if err != nil {
 		neat.ErrorLog("Failed to update environment")
-		return -1.0, err
+		return err
 	}
 
-	dist, err := env.distanceToExit()
-	if err != nil {
-		neat.ErrorLog("Failed to estimate distance to maze exit")
-		return -1.0, err
-	}
-	if dist < 1 {
-		dist = 1
-	}
-
-	fitness := 5.0 / dist
-
-	return fitness, nil
+	return nil
 }
