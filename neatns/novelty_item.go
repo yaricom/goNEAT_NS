@@ -1,26 +1,46 @@
 package neatns
 
+import (
+	"io"
+	"fmt"
+)
+
 // The data holder for novel item's genome and phenotype
 type NoveltyItem struct {
 	// The flag to indicate whether item was added to archive
-	added      bool
+	added        bool
 	// The generation when item was added to archive
-	Generation int
+	Generation   int
+
+	// The ID of associated individual organism */
+	IndividualID int
 
 	// The fitness of the associated organism
-	Fitness    float64
+	Fitness      float64
 	// The novelty of this item
-	Novelty    float64
+	Novelty      float64
 	// The item's age
-	Age        float64
+	Age          float64
 
 	// The data associated with item
-	Data       []float64
+	Data         []float64
 }
 
 // Creates new novelty item
 func NewNoveltyItem() *NoveltyItem {
 	return &NoveltyItem{Data:make([]float64, 0)}
+}
+
+// Stringer
+func (ni NoveltyItem) String() string  {
+	str := fmt.Sprintf("/* Novelty: %.2f Fitness: %.2f Generation: %d Individual: %d */\n",
+		ni.Novelty, ni.Fitness, ni.Generation, ni.IndividualID)
+	str += "/* Point: "
+	for _, v := range ni.Data {
+		str += fmt.Sprintf(" %.3f", v)
+	}
+	str += " */"
+	return str
 }
 
 // the structure to hold distance between two items
