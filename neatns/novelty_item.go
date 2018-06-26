@@ -33,9 +33,9 @@ func NewNoveltyItem() *NoveltyItem {
 
 // Stringer
 func (ni NoveltyItem) String() string  {
-	str := fmt.Sprintf("/* Novelty: %.2f Fitness: %.2f Generation: %d Individual: %d */\n",
+	str := fmt.Sprintf("/* Novelty: %.2f Fitness: %.2f Generation: %d Individual: %d\n",
 		ni.Novelty, ni.Fitness, ni.Generation, ni.IndividualID)
-	str += "/* Point: "
+	str += "\tPoint: "
 	for _, v := range ni.Data {
 		str += fmt.Sprintf(" %.3f", v)
 	}
