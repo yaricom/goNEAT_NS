@@ -6,7 +6,19 @@ import (
 	"github.com/yaricom/goNEAT/neat"
 	"github.com/yaricom/goNEAT/neat/genetics"
 	"github.com/yaricom/goNEAT_NS/neatns"
+	"math"
 )
+
+// calculates item-wise difference between two vectors
+func histDiff(in1, in2 []float64) float64 {
+	size := len(in1)
+	diff_accum := 0.0
+	for i := 0; i < size; i++ {
+		diff := in1[i] - in2[i]
+		diff_accum += math.Abs(diff)
+	}
+	return diff_accum / float64(size)
+}
 
 
 // To evaluate an individual organism within provided maze environment and to create corresponding novelty point
