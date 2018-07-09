@@ -4,6 +4,8 @@ import (
 	"github.com/yaricom/goNEAT/neat/genetics"
 	"sort"
 	"errors"
+	"io"
+	"fmt"
 )
 
 // The maximal allowed size for fittest items list
@@ -72,7 +74,7 @@ func (a *NoveltyArchive) EvaluateIndividualNovelty(org *genetics.Organism, pop *
 		result = a.noveltyAvgKnn(&item, 1, nil)
 		if result > a.noveltyThreshold || len(a.NovelItems) < archiveSeedAmount {
 			a.addNoveltyItem(&item)
-			item.Age = 1.0
+			item.Age += 1.0
 		}
 	}
 
@@ -89,14 +91,6 @@ func (a *NoveltyArchive) EvaluatePopulationNovelty(pop *genetics.Population, onl
 	for _, o := range pop.Organisms {
 		a.EvaluateIndividualNovelty(o, pop, onlyFitness)
 	}
-}
-
-// add novelty item to archive
-func (a *NoveltyArchive) addNoveltyItem(i *NoveltyItem) {
-	i.added = true
-	i.Generation = a.Generation
-	a.NovelItems = append(a.NovelItems, i)
-	a.itemsAddedInGeneration++
 }
 
 // to maintain list of fittest organisms so far
@@ -131,6 +125,45 @@ func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error
 	return nil
 }
 
+// the steady-state end of generation call
+func (a *NoveltyArchive) EndOfGeneration() {
+	a.Generation++
+
+	a.adjustArchiveSettings()
+}
+
+// prints collected novelty points to provided writer
+func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
+	if len(a.NovelItems) == 0 {
+		return errors.New("No novel items to print!!!")
+	}
+	for _, p := range a.NovelItems {
+		str := p.String()
+		fmt.Fprintln(w, str)
+	}
+	return nil
+}
+
+// prints collected individuals with maximal fitness
+func (a *NoveltyArchive) PrintFittest(w io.Writer) error {
+	if len(a.NovelItems) == 0 {
+		return errors.New("No novel items to print!!!")
+	}
+	for _, f := range a.FittestItems {
+		str := f.String()
+		fmt.Fprintln(w, str)
+	}
+	return nil
+}
+
+// add novelty item to archive
+func (a *NoveltyArchive) addNoveltyItem(i *NoveltyItem) {
+	i.added = true
+	i.Generation = a.Generation
+	a.NovelItems = append(a.NovelItems, i)
+	a.itemsAddedInGeneration++
+}
+
 // to adjust dynamic novelty threshold depending on how many have been added to archive recently
 func (a *NoveltyArchive) adjustArchiveSettings() {
 	if a.itemsAddedInGeneration == 0 {
@@ -155,13 +188,6 @@ func (a *NoveltyArchive) adjustArchiveSettings() {
 
 	a.itemsAddedInGeneration = 0
 	a.generationIndex = len(a.NovelItems)
-}
-
-// the steady-state end of generation call
-func (a *NoveltyArchive) EndOfGeneration() {
-	a.Generation++
-
-	a.adjustArchiveSettings()
 }
 
 // the K nearest neighbor novelty score calculation for given item within provided population if any
