@@ -60,7 +60,7 @@ func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive 
 
 // evaluate the novelty of a single individual organism within population and update its fitness (onlyFitness = true)
 // or store individual's novelty item into archive
-func (a *NoveltyArchive) EvaluateIndividual(org *genetics.Organism, pop *genetics.Population, onlyFitness bool) {
+func (a *NoveltyArchive) EvaluateIndividualNovelty(org *genetics.Organism, pop *genetics.Population, onlyFitness bool) {
 	item := org.Data.Value.(NoveltyItem)
 	var result float64
 	if onlyFitness {
@@ -85,9 +85,9 @@ func (a *NoveltyArchive) EvaluateIndividual(org *genetics.Organism, pop *genetic
 
 // evaluate the novelty of the whole population and update organisms fitness (onlyFitness = true)
 // or store each population individual's novelty items into archive
-func (a *NoveltyArchive) EvaluatePopulation(pop *genetics.Population, onlyFitness bool) {
+func (a *NoveltyArchive) EvaluatePopulationNovelty(pop *genetics.Population, onlyFitness bool) {
 	for _, o := range pop.Organisms {
-		a.EvaluateIndividual(o, pop, onlyFitness)
+		a.EvaluateIndividualNovelty(o, pop, onlyFitness)
 	}
 }
 
@@ -100,7 +100,7 @@ func (a *NoveltyArchive) addNoveltyItem(i *NoveltyItem) {
 }
 
 // to maintain list of fittest organisms so far
-func (a *NoveltyArchive) updateFittestWithOrganism(org *genetics.Organism) error {
+func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error {
 	if org.Data == nil {
 		return errors.New("Organism with no Data provided")
 	}

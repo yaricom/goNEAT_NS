@@ -31,7 +31,7 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 		t.Error(err)
 	}
 	org := genetics.NewOrganism(0.1, gen, 1)
-	err = archive.updateFittestWithOrganism(fillOrganismData(org, 0.0))
+	err = archive.UpdateFittestWithOrganism(fillOrganismData(org, 0.0))
 	if err != nil {
 		t.Error(err)
 		return
@@ -43,7 +43,7 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 	}
 
 	for i := 2; i <= fittestAllowedSize; i++ {
-		archive.updateFittestWithOrganism(fillOrganismData(genetics.NewOrganism(0.1 * float64(i), gen, 1), 0.0))
+		archive.UpdateFittestWithOrganism(fillOrganismData(genetics.NewOrganism(0.1 * float64(i), gen, 1), 0.0))
 	}
 
 	for i := 0; i < fittestAllowedSize; i++ {
@@ -54,7 +54,7 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 
 	// test update over allowed size
 	fitness := 0.6
-	archive.updateFittestWithOrganism(fillOrganismData(genetics.NewOrganism(fitness, gen, 1), 0.0))
+	archive.UpdateFittestWithOrganism(fillOrganismData(genetics.NewOrganism(fitness, gen, 1), 0.0))
 	if len(archive.FittestItems) != fittestAllowedSize {
 		t.Error("len(archive.FittestItems) != fittestAllowedSize")
 	}
@@ -123,7 +123,7 @@ func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
 
 	// test evaluate only in archive
 	org := pop.Organisms[0]
-	archive.EvaluateIndividual(org, pop, false)
+	archive.EvaluateIndividualNovelty(org, pop, false)
 
 	if len(archive.NovelItems) != 1 {
 		t.Errorf("len(archive.NovelItems) != 1, found: %d\n", len(archive.NovelItems))
@@ -141,7 +141,7 @@ func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
 	}
 
 	// test evaluate in population as well
-	archive.EvaluateIndividual(org, pop, true)
+	archive.EvaluateIndividualNovelty(org, pop, true)
 	if len(archive.NovelItems) != 1 {
 		t.Errorf("len(archive.NovelItems) != 1, found: %d\n", len(archive.NovelItems))
 	}
@@ -180,7 +180,7 @@ func TestNoveltyArchive_EvaluatePopulation(t *testing.T) {
 	archive.Generation = 2
 
 	// test update fitness scores
-	archive.EvaluatePopulation(pop, true)
+	archive.EvaluatePopulationNovelty(pop, true)
 	for i := 0; i < len(pop.Organisms); i++ {
 		if pop.Organisms[i].Fitness == 0.1 * (1.0 + float64(i)) {
 			t.Errorf("Organism #%d fitness should be unpdated\n", i)
@@ -188,7 +188,7 @@ func TestNoveltyArchive_EvaluatePopulation(t *testing.T) {
 	}
 
 	// test add to archive
-	archive.EvaluatePopulation(pop, false)
+	archive.EvaluatePopulationNovelty(pop, false)
 	if len(archive.NovelItems) != 3 {
 		t.Errorf("NovelItems count in archive expected: %d, but was: %d\n", 3, len(archive.NovelItems))
 	}
