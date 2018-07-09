@@ -1,7 +1,6 @@
 package neatns
 
 import (
-	"io"
 	"fmt"
 )
 
