@@ -9,13 +9,17 @@ import (
 // The record holding info about individual maze agent performance at the end of simulation
 type AgentRecord struct {
 	// The ID of agent
-	AgentID int
+	AgentID    int
 	// The agent position at the end of simulation
-	X, Y    float64
+	X, Y       float64
 	// The agent fitness
-	Fitness float64
+	Fitness    float64
 	// The flag to indicate whether agent reached maze exit
-	GotExit bool
+	GotExit    bool
+	// The generation of associated individual
+	Generation int
+	// The novelty value associated
+	Novelty    float64
 }
 
 // The maze agent records storage
