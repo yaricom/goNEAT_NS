@@ -158,7 +158,7 @@ func (a *NoveltyArchive) adjustArchiveSettings() {
 }
 
 // the steady-state end of generation call
-func (a *NoveltyArchive) endOfGeneration() {
+func (a *NoveltyArchive) EndOfGeneration() {
 	a.Generation++
 
 	a.adjustArchiveSettings()
