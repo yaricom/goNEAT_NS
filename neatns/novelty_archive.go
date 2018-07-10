@@ -63,17 +63,17 @@ func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive 
 // evaluate the novelty of a single individual organism within population and update its fitness (onlyFitness = true)
 // or store individual's novelty item into archive
 func (a *NoveltyArchive) EvaluateIndividualNovelty(org *genetics.Organism, pop *genetics.Population, onlyFitness bool) {
-	item := org.Data.Value.(NoveltyItem)
+	item := org.Data.Value.(*NoveltyItem)
 	var result float64
 	if onlyFitness {
 		// assign organism fitness according to average novelty within archive and population
-		result = a.noveltyAvgKnn(&item, -1, pop)
+		result = a.noveltyAvgKnn(item, -1, pop)
 		org.Fitness = result
 	} else {
 		// consider adding a point to archive based on dist to nearest neighbor
-		result = a.noveltyAvgKnn(&item, 1, nil)
+		result = a.noveltyAvgKnn(item, 1, nil)
 		if result > a.noveltyThreshold || len(a.NovelItems) < archiveSeedAmount {
-			a.addNoveltyItem(&item)
+			a.addNoveltyItem(item)
 			item.Age += 1.0
 		}
 	}
@@ -101,17 +101,17 @@ func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error
 
 	if len(a.FittestItems) < fittestAllowedSize {
 		// store organism's novelty item into fittest
-		item := org.Data.Value.(NoveltyItem)
-		a.FittestItems = append(a.FittestItems, &item)
+		item := org.Data.Value.(*NoveltyItem)
+		a.FittestItems = append(a.FittestItems, item)
 
 		// sort to have most fit first
 		sort.Sort(sort.Reverse(a.FittestItems))
 	} else {
 		last_item := a.FittestItems[len(a.FittestItems) - 1]
-		org_item := org.Data.Value.(NoveltyItem)
+		org_item := org.Data.Value.(*NoveltyItem)
 		if org_item.Fitness > last_item.Fitness {
 			// store organism's novelty item into fittest
-			a.FittestItems = append(a.FittestItems, &org_item)
+			a.FittestItems = append(a.FittestItems, org_item)
 
 			// sort to have most fit first
 			sort.Sort(sort.Reverse(a.FittestItems))
@@ -258,10 +258,10 @@ func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics
 	}
 
 	for i := 0; i < len(pop.Organisms); i++ {
-		org_item := pop.Organisms[i].Data.Value.(NoveltyItem)
+		org_item := pop.Organisms[i].Data.Value.(*NoveltyItem)
 		novelties[n_index] = ItemsDistance{
-			distance:a.noveltyMetric(&org_item, item),
-			from:&org_item,
+			distance:a.noveltyMetric(org_item, item),
+			from:org_item,
 			to:item,
 		}
 		n_index++
