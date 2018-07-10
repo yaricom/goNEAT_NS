@@ -4,7 +4,7 @@ weight_mut_power 0.8
 disjoint_coeff 1.0
 excess_coeff 1.0
 mutdiff_coeff 3.0
-compat_thresh 4.0
+compat_threshold 4.0
 age_significance 1.0
 survival_thresh 0.4
 mutate_only_prob 0.3
@@ -26,7 +26,7 @@ recur_only_prob 0.2
 pop_size 250
 dropoff_age 2000
 newlink_tries 40
-print_every 50
+print_every 100
 babies_stolen 0
 num_runs 1
 num_generations 2000
@@ -36,10 +36,3 @@ log_level 1
 linktrait_mut_sig 1.0
 nodetrait_mut_sig 0.5
 recur_prob 0.15
-
-
-
-
-
-
-
