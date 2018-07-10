@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"fmt"
+	"github.com/yaricom/goNEAT/neat"
 )
 
 // The maximal allowed size for fittest items list
@@ -63,6 +64,11 @@ func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive 
 // evaluate the novelty of a single individual organism within population and update its fitness (onlyFitness = true)
 // or store individual's novelty item into archive
 func (a *NoveltyArchive) EvaluateIndividualNovelty(org *genetics.Organism, pop *genetics.Population, onlyFitness bool) {
+	if org.Data == nil {
+		neat.InfoLog(fmt.Sprintf(
+			"WARNING! Found Organism without novelty point associated: %s\nNovelty evaluation will be skipped for it. Probably winner found!", org))
+		return
+	}
 	item := org.Data.Value.(*NoveltyItem)
 	var result float64
 	if onlyFitness {
@@ -246,7 +252,7 @@ func (a *NoveltyArchive) mapNovelty(item *NoveltyItem) ItemsDistances {
 
 // map the novelty metric across the archive and the current population
 func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics.Population) ItemsDistances {
-	novelties := make([]ItemsDistance, len(a.NovelItems) + len(pop.Organisms))
+	novelties := make([]ItemsDistance, len(a.NovelItems))
 	n_index := 0
 	for i := 0; i < len(a.NovelItems); i++ {
 		novelties[n_index] = ItemsDistance{
@@ -258,13 +264,15 @@ func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics
 	}
 
 	for i := 0; i < len(pop.Organisms); i++ {
-		org_item := pop.Organisms[i].Data.Value.(*NoveltyItem)
-		novelties[n_index] = ItemsDistance{
-			distance:a.noveltyMetric(org_item, item),
-			from:org_item,
-			to:item,
+		if pop.Organisms[i].Data != nil {
+			org_item := pop.Organisms[i].Data.Value.(*NoveltyItem)
+			dist := ItemsDistance{
+				distance:a.noveltyMetric(org_item, item),
+				from:org_item,
+				to:item,
+			}
+			novelties = append(novelties, dist)
 		}
-		n_index++
 	}
 	return ItemsDistances(novelties)
 }
