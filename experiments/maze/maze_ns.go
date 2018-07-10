@@ -24,7 +24,7 @@ type MazeNoveltySearchEvaluator struct {
 	// The output path to store execution results
 	OutputPath     string
 	// The maze seed environment
-	environment    *Environment
+	Environment    *Environment
 
 	// The record store for evaluated agents
 	records        *RecordStore
@@ -151,7 +151,7 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 	record := AgentRecord{Generation:epoch.Id, AgentID:ev.individCounter}
 
 	// evaluate individual organism and get novelty point
-	n_item, err := mazeSimulationEvaluate(ev.environment, org, &record)
+	n_item, err := mazeSimulationEvaluate(ev.Environment, org, &record)
 	if err != nil {
 		return false, err
 	}
