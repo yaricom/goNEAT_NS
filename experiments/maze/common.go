@@ -52,7 +52,11 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 		return nil, err
 	}
 	// normalize fitness value in range (0;1] and store it
-	fitness = 1 / (fitness + 1)
+	fitness = env.initialDistance / (env.initialDistance - fitness + 0.0000001)
+	if fitness < 0 {
+		fitness = 0.01
+	}
+
 	n_item.Fitness = fitness
 
 	// store final agent coordinates as organism's novelty characteristics
@@ -76,11 +80,6 @@ func mazeSimulationInit(env Environment, org *genetics.Organism) (*Environment, 
 
 	// get Organism phenotype's network depth
 	net_depth, err := org.Phenotype.MaxDepth() // The max depth of the network to be activated
-	if err != nil {
-		neat.WarnLog(
-			fmt.Sprintf("Failed to estimate maximal depth of the network with loop:\n%s\nUsing default dpeth: %d",
-				org.Genotype, net_depth))
-	}
 	neat.DebugLog(fmt.Sprintf("Network depth: %d for organism: %d\n", net_depth, org.Genotype.Id))
 	if net_depth == 0 {
 		neat.DebugLog(fmt.Sprintf("ALERT: Network depth is ZERO for Genome: %s", org.Genotype))
