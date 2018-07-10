@@ -206,6 +206,9 @@ type Environment struct {
 	TimeSteps  int
 	// The sample step size to determine when to collect subsequent samples during simulation
 	SampleSize int
+
+	// The initial distance of agent from exit
+	initialDistance float64
 }
 
 // Reads maze environment from reader
@@ -252,7 +255,10 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 	}
 	env.updateRadar()
 
-	return &env, nil
+	// find initial distance
+	env.initialDistance, err = env.agentDistanceToExit()
+
+	return &env, err
 }
 
 // create neural net inputs from maze agent sensors
