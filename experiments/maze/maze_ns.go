@@ -7,6 +7,7 @@ import (
 	"github.com/yaricom/goNEAT/experiments"
 	"fmt"
 	"os"
+	"errors"
 )
 
 // The initial novelty threshold for Novelty Archive
@@ -22,10 +23,18 @@ var noveltyMetric neatns.NoveltyMetric = func(x, y *neatns.NoveltyItem) float64 
 // The maze solving experiment with Novelty Search optimization of NEAT algorithm
 type MazeNoveltySearchEvaluator struct {
 	// The output path to store execution results
-	OutputPath     string
+	OutputPath       string
 	// The maze seed environment
-	Environment    *Environment
+	Environment      *Environment
 
+	// The target number of species to be maintained
+	NumSpeciesTarget int
+	// The species compatibility threshold adjustment frequency
+	CompatAdjustFreq int
+}
+
+// The structure to hold maze simulator evaluation results
+type mazeSimResults struct {
 	// The record store for evaluated agents
 	records        *RecordStore
 	// The novelty archive
@@ -37,18 +46,20 @@ type MazeNoveltySearchEvaluator struct {
 	individCounter int
 }
 
-// Invoked before new trial run started
-func (ev *MazeNoveltySearchEvaluator) TrialRunStarted(trial *experiments.Trial) {
-	ev.trialID = trial.Id
-	ev.individCounter = 0
+// The simulation results for one trial
+var trialSim mazeSimResults
 
-	// create new record store and novelty archive
-	ev.records = new(RecordStore)
-	ev.archive = neatns.NewNoveltyArchive(archive_thresh, noveltyMetric)
+// Invoked before new trial run started
+func (ev MazeNoveltySearchEvaluator) TrialRunStarted(trial *experiments.Trial) {
+	trialSim = mazeSimResults{
+		trialID : trial.Id,
+		records : new(RecordStore),
+		archive : neatns.NewNoveltyArchive(archive_thresh, noveltyMetric),
+	}
 }
 
 // This method evaluates one epoch for given population and prints results into output directory if any.
-func (ev *MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population, epoch *experiments.Generation, context *neat.NeatContext) (err error) {
+func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population, epoch *experiments.Generation, context *neat.NeatContext) (err error) {
 	// Evaluate each organism on a test
 	for _, org := range pop.Organisms {
 		res, err := ev.orgEvaluate(org, pop, epoch)
@@ -59,15 +70,23 @@ func (ev *MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Populatio
 			epoch.Solved = true
 			epoch.WinnerNodes = len(org.Genotype.Nodes)
 			epoch.WinnerGenes = org.Genotype.Extrons()
-			epoch.WinnerEvals = ev.individCounter
+			epoch.WinnerEvals = trialSim.individCounter
 			epoch.Best = org
 
 			break // we have a winner
+		}
+		if org.Data == nil {
+			return errors.New(fmt.Sprintf("Novelty point not found at organism: %s", org))
 		}
 	}
 
 	// Fill statistics about current epoch
 	epoch.FillPopulationStatistics(pop)
+
+	// adjust archive settings
+	trialSim.archive.EndOfGeneration()
+	//refresh generation's novelty scores
+	trialSim.archive.EvaluatePopulationNovelty(pop, true)
 
 	// Only print to file every print_every generations
 	if epoch.Solved || epoch.Id % context.PrintEvery == 0 || epoch.Id == context.NumGenerations - 1 {
@@ -102,9 +121,24 @@ func (ev *MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Populatio
 		// the last epoch executed
 		ev.storeRecorded()
 	} else {
-		ev.archive.EndOfGeneration()
-		//refresh generation's novelty scores
-		ev.archive.EvaluatePopulationNovelty(pop, true)
+		speciesCount := len(pop.Species)
+
+		// adjust species count by keeping it constant
+		if epoch.Id % ev.CompatAdjustFreq == 0 {
+			if speciesCount < ev.NumSpeciesTarget {
+				context.CompatThreshold -= 0.1
+			} else if speciesCount > ev.NumSpeciesTarget {
+				context.CompatThreshold += 0.1
+			}
+
+			// to avoid dropping too low
+			if context.CompatThreshold < 0.3 {
+				context.CompatThreshold = 0.3
+			}
+		}
+
+		neat.InfoLog(fmt.Sprintf("%d species -> %d organisms [compatibility threshold: %.1f, target: %d]\n",
+			speciesCount, len(pop.Organisms), context.CompatThreshold, ev.NumSpeciesTarget))
 
 		// Move to the next epoch if failed to find winner
 		neat.DebugLog(">>>>> start next generation")
@@ -119,7 +153,7 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	rec_path := fmt.Sprintf("%s/record.dat", ev.OutputPath)
 	rec_file, err := os.Create(rec_path)
 	if err == nil {
-		err = ev.records.Write(rec_file)
+		err = trialSim.records.Write(rec_file)
 	}
 	if err != nil {
 		neat.ErrorLog(fmt.Sprintf("Failed to store agents' data records, reason: %s\n", err))
@@ -129,7 +163,7 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	np_path := fmt.Sprintf("%s/novelty_points.txt", ev.OutputPath)
 	np_file, err := os.Create(np_path)
 	if err == nil {
-		err = ev.archive.PrintNoveltyPoints(np_file)
+		err = trialSim.archive.PrintNoveltyPoints(np_file)
 	}
 	if err != nil {
 		neat.ErrorLog(fmt.Sprintf("Failed to print novelty points from archive, reason: %s\n", err))
@@ -139,16 +173,16 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	np_path = fmt.Sprintf("%s/fittest_novelty_points.txt", ev.OutputPath)
 	np_file, err = os.Create(np_path)
 	if err == nil {
-		ev.archive.PrintFittest(np_file)
+		trialSim.archive.PrintFittest(np_file)
 	}
 	if err != nil {
-		err = neat.ErrorLog(fmt.Sprintf("Failed to print fittest novelty points from archive, reason: %s\n", err))
+		neat.ErrorLog(fmt.Sprintf("Failed to print fittest novelty points from archive, reason: %s\n", err))
 	}
 }
 
 func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *genetics.Population, epoch *experiments.Generation) (bool, error) {
 	// create record to store simulation results for organism
-	record := AgentRecord{Generation:epoch.Id, AgentID:ev.individCounter}
+	record := AgentRecord{Generation:epoch.Id, AgentID:trialSim.individCounter}
 
 	// evaluate individual organism and get novelty point
 	n_item, err := mazeSimulationEvaluate(ev.Environment, org, &record)
@@ -156,21 +190,22 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 		return false, err
 	}
 	n_item.IndividualID = org.Genotype.Id
-	org.Data.Value = n_item // store novelty item within organism data
+	org.Data = &genetics.OrganismData{Value:n_item}  // store novelty item within organism data
 	org.IsWinner = record.GotExit // store if maze was solved
+	org.Error = 1 - n_item.Fitness // error value consider how far  we are from exit normalized to (0;1] range
 
 	// calculate novelty of new individual within archive of known novel items
-	ev.archive.EvaluateIndividualNovelty(org, pop, false)
-	record.Novelty = org.Data.Value.(neatns.NoveltyItem).Novelty // put it to the record
+	trialSim.archive.EvaluateIndividualNovelty(org, pop, false)
+	record.Novelty = org.Data.Value.(*neatns.NoveltyItem).Novelty // put it to the record
 
 	// add record
-	ev.records = append(ev.records, &record)
+	trialSim.records.Records = append(trialSim.records.Records, record)
 
 	// increment tested unique individuals counter
-	ev.individCounter++
+	trialSim.individCounter++
 
 	// update fittest organisms list
-	ev.archive.UpdateFittestWithOrganism(org)
+	trialSim.archive.UpdateFittestWithOrganism(org)
 
 	return org.IsWinner, nil
 }
