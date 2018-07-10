@@ -27,17 +27,16 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 
 	// initialize maze simulation's environment specific to the provided organism - this will be a copy
 	// of primordial environment provided
-	org_env := *env
-	org_env, err := mazeSimulationInit(org_env, org)
+	org_env, err := mazeSimulationInit(*env, org)
 	if err != nil {
-		return 0.0, err
+		return nil, err
 	}
 
 	// do specified amount of time steps emulations
 	for i := 0; i < org_env.TimeSteps; i++ {
-		err := mazeSimulationStep(&org_env, org)
+		err := mazeSimulationStep(org_env, org)
 		if err != nil {
-			return 0.0, err
+			return nil, err
 		}
 		// store agent path points at given sample size
 		if (org_env.TimeSteps - i - 1) % org_env.SampleSize == 0 {
@@ -50,7 +49,7 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 	fitness, err := org_env.agentDistanceToExit()
 	if err != nil {
 		neat.ErrorLog("failed to estimate organism fitness by its final distance to exit")
-		return 0.0, err
+		return nil, err
 	}
 	// normalize fitness value in range (0;1] and store it
 	fitness = 1 / (fitness + 1)
