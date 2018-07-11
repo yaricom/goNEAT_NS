@@ -39,7 +39,7 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 			return nil, err
 		}
 		// store agent path points at given sample size
-		if (org_env.TimeSteps - i - 1) % org_env.SampleSize == 0 {
+		if (org_env.TimeSteps - i) % org_env.SampleSize == 0 {
 			n_item.Data = append(n_item.Data, org_env.Hero.Location.X)
 			n_item.Data = append(n_item.Data, org_env.Hero.Location.Y)
 		}
