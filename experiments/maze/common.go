@@ -52,7 +52,7 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 		return nil, err
 	}
 	// normalize fitness value in range (0;1] and store it
-	fitness = env.initialDistance / (env.initialDistance - fitness + 0.0000001)
+	fitness = (env.initialDistance - fitness) / env.initialDistance
 	if fitness < 0 {
 		fitness = 0.01
 	}
