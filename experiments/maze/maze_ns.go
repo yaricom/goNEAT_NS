@@ -104,7 +104,7 @@ func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population
 		for _, org := range pop.Organisms {
 			if org.IsWinner {
 				// Prints the winner organism to file!
-				org_path := fmt.Sprintf("%s/%s", ev.OutputPath, "pole_winner")
+				org_path := fmt.Sprintf("%s/%s", ev.OutputPath, "mazens_winner")
 				file, err := os.Create(org_path)
 				if err != nil {
 					neat.ErrorLog(fmt.Sprintf("Failed to dump winner organism genome, reason: %s\n", err))
@@ -160,7 +160,7 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	}
 
 	// print collected novelty points from archive
-	np_path := fmt.Sprintf("%s/novelty_points.txt", ev.OutputPath)
+	np_path := fmt.Sprintf("%s/novelty_archive_points.txt", ev.OutputPath)
 	np_file, err := os.Create(np_path)
 	if err == nil {
 		err = trialSim.archive.PrintNoveltyPoints(np_file)
@@ -170,7 +170,7 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	}
 
 	// print novelty points with maximal fitness
-	np_path = fmt.Sprintf("%s/fittest_novelty_points.txt", ev.OutputPath)
+	np_path = fmt.Sprintf("%s/fittest_novelty_archive_points.txt", ev.OutputPath)
 	np_file, err = os.Create(np_path)
 	if err == nil {
 		trialSim.archive.PrintFittest(np_file)
