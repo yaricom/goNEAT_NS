@@ -459,6 +459,7 @@ func (e *Environment) testAgentCollision(loc Point) bool {
 func (e *Environment) String() string {
 	str := fmt.Sprintf("MAZE\nHero at: %.1f, %.1f\n", e.Hero.Location.X, e.Hero.Location.Y)
 	str += fmt.Sprintf("Exit at: %.1f, %.1f\n", e.MazeExit.X, e.MazeExit.Y)
+	str += fmt.Sprintf("Initial distance from exit: %f\n", e.initialDistance)
 	str += "Lines:\n"
 	for _, l := range e.Lines {
 		str += fmt.Sprintf("\t[%.1f, %.1f] -> [%.1f, %.1f]\n", l.A.X, l.A.Y, l.B.X, l.B.Y)
