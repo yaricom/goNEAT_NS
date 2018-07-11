@@ -63,6 +63,7 @@ func main() {
 			environment.TimeSteps = *time_steps
 			environment.SampleSize = *time_steps_sample
 		}
+		log.Println(environment)
 	}
 	if err != nil {
 		log.Fatal("Failed to read maze environment configuration: ", err)
