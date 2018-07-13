@@ -54,12 +54,17 @@ The agent has *six rangefinders* that indicate the distance to the nearest obsta
 fire when the goal is within the pie-slice. The agent’s two effectors result in forces that respectively turn and propel
 the robot, i.e. change it's linear and angular velocity.
 
-As a result the seed genome of organism describing maze agent's behaviour has ten input nodes/neurons, two output nodes,
-one bias node and one hidden unit to model non linearity (see [seed genome](data/mazestartgenes) for details).
-During NEAT algorithm execution with Novelty Search optimization provided seed genome will become more complex by
-adding new nodes/links and adjusting link weights.
-
 ![alt text][seed_genome_graph]
+
+Thus the seed genome of maze solving agent has following configuration (see [seed genome](data/mazestartgenes) for details):
+
+* ten input (sensor) neurons: six for range finders plus four for slice radar sensors (blue)
+* two output neurons: linear and angular velocity controlling effectors (red)
+* one hidden neuron to introduce non linearity (green)
+* one bias neuron to avoid zero saturation when input neurons is not activated (yellow)
+
+During NEAT algorithm execution with Novelty Search optimization the provided seed genome will be complexified by
+adding new nodes/links and adjusting link weights.
 
 ## Experiments and Performance evaluation
 
