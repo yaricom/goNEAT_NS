@@ -25,7 +25,7 @@ The source code written and compiled against GO 1.9.x.
 Make sure that you have at least GO 1.9.x. environment installed onto your system and execute following command:
 ```bash
 
-go get github.com/yaricom/goNEAT_NS
+go get -t github.com/yaricom/goNEAT_NS
 ```
 
 This project is dependent on [goNEAT][3] project which will be installed automatically when command above executed.
