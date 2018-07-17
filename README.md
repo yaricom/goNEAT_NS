@@ -142,9 +142,11 @@ Introduced genome was able to solve maze and find exit with spatial error about 
 ![alt text][mazens_medium_winner_records]
 
 Above is a rendering of maze solving simulation by agents controlled by ANNs which is generated from genomes of all organisms
-introduced into population until winner is found. The agents is color coded depending on which species the source organism
+introduced into population until winner is found. The agents is *color coded* depending on which species the source organism
 belongs. The fitness of agent is measured as a relative distance between it's final destination and maze exit after running simulation
 for particular number of time steps (400 in our setup).
+
+The initial agent position is at the top-left corner marked with green circle and maze exit at the bottom-right marked with red circle.
 
 The top plot shows final destinations of the most fit agents (fitness >= 0.8) and bottom is the rest. The results is given
 for experimental run with winner genome configuration presented above. At that experiment was produced 32 species among which
