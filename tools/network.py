@@ -89,7 +89,7 @@ class Network(object):
         g = nx.DiGraph()
         
         for k, n in self.nodes.items():
-            g.add_node(n.node_id, color=n.color())
+            g.add_node(n.node_id, color=n.color(), n_type=n.neuron_type)
             
         for l in self.links:
             if l.node_in not in self.nodes or l.node_out not in self.nodes:
