@@ -1,0 +1,10 @@
+/* Novelty: 27.22 Fitness: 0.980955 Generation: 65 Individual: 110
+	Point:  274.781 99.510 */
+/* Novelty: 26.40 Fitness: 0.974597 Generation: 58 Individual: 112
+	Point:  265.229 104.282 */
+/* Novelty: 25.70 Fitness: 0.974597 Generation: 62 Individual: 116
+	Point:  265.229 104.282 */
+/* Novelty: 18.80 Fitness: 0.961701 Generation: 63 Individual: 113
+	Point:  263.800 107.414 */
+/* Novelty: 19.81 Fitness: 0.959437 Generation: 63 Individual: 116
+	Point:  267.776 109.992 */

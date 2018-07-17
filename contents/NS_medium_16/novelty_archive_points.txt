@@ -1,0 +1,140 @@
+/* Novelty: 0.75 Fitness: 0.260500 Generation: 1 Individual: 0
+	Point:  83.921 85.833 */
+/* Novelty: 0.26 Fitness: 0.010000 Generation: 1 Individual: 1
+	Point:  15.151 22.000 */
+/* Novelty: 0.26 Fitness: 0.192027 Generation: 1 Individual: 3
+	Point:  81.612 22.000 */
+/* Novelty: 0.00 Fitness: 0.000000 Generation: 1 Individual: 4
+	Point:  30.000 22.000 */
+/* Novelty: 1.35 Fitness: 0.171213 Generation: 1 Individual: 6
+	Point:  73.147 29.342 */
+/* Novelty: 2.38 Fitness: 0.010000 Generation: 1 Individual: 7
+	Point:  16.543 124.701 */
+/* Novelty: 5.06 Fitness: 0.214362 Generation: 1 Individual: 8
+	Point:  71.959 90.662 */
+/* Novelty: 8.70 Fitness: 0.010000 Generation: 1 Individual: 21
+	Point:  13.078 85.962 */
+/* Novelty: 7.08 Fitness: 0.119210 Generation: 1 Individual: 24
+	Point:  61.862 22.000 */
+/* Novelty: 4.24 Fitness: 0.010000 Generation: 1 Individual: 39
+	Point:  13.033 102.858 */
+/* Novelty: 24.00 Fitness: 0.439303 Generation: 1 Individual: 42
+	Point:  128.509 101.210 */
+/* Novelty: 10.22 Fitness: 0.062361 Generation: 1 Individual: 52
+	Point:  49.015 15.416 */
+/* Novelty: 1.80 Fitness: 0.220502 Generation: 1 Individual: 61
+	Point:  74.303 80.045 */
+/* Novelty: 13.15 Fitness: 0.168342 Generation: 1 Individual: 78
+	Point:  61.857 126.906 */
+/* Novelty: 10.16 Fitness: 0.213409 Generation: 1 Individual: 79
+	Point:  71.717 109.315 */
+/* Novelty: 9.11 Fitness: 0.164351 Generation: 1 Individual: 86
+	Point:  63.527 57.105 */
+/* Novelty: 4.46 Fitness: 0.010000 Generation: 1 Individual: 90
+	Point:  19.735 13.626 */
+/* Novelty: 4.59 Fitness: 0.010000 Generation: 1 Individual: 92
+	Point:  13.084 52.709 */
+/* Novelty: 2.66 Fitness: 0.142317 Generation: 1 Individual: 99
+	Point:  63.432 35.370 */
+/* Novelty: 3.37 Fitness: 0.010000 Generation: 1 Individual: 104
+	Point:  16.590 42.478 */
+/* Novelty: 14.06 Fitness: 0.086541 Generation: 1 Individual: 137
+	Point:  43.104 59.296 */
+/* Novelty: 11.78 Fitness: 0.190541 Generation: 1 Individual: 149
+	Point:  66.682 119.730 */
+/* Novelty: 11.96 Fitness: 0.058950 Generation: 1 Individual: 154
+	Point:  32.620 93.097 */
+/* Novelty: 10.94 Fitness: 0.173769 Generation: 1 Individual: 201
+	Point:  61.498 101.209 */
+/* Novelty: 11.27 Fitness: 0.095011 Generation: 1 Individual: 205
+	Point:  42.877 123.931 */
+/* Novelty: 3.00 Fitness: 0.010000 Generation: 1 Individual: 221
+	Point:  14.409 114.442 */
+/* Novelty: 6.42 Fitness: 0.011710 Generation: 2 Individual: 8
+	Point:  24.079 58.476 */
+/* Novelty: 5.15 Fitness: 0.010000 Generation: 2 Individual: 15
+	Point:  24.838 35.156 */
+/* Novelty: 4.03 Fitness: 0.010000 Generation: 2 Individual: 30
+	Point:  15.021 68.057 */
+/* Novelty: 4.68 Fitness: 0.044028 Generation: 2 Individual: 57
+	Point:  30.132 125.751 */
+/* Novelty: 10.36 Fitness: 0.086336 Generation: 2 Individual: 72
+	Point:  40.141 81.918 */
+/* Novelty: 6.94 Fitness: 0.163109 Generation: 2 Individual: 120
+	Point:  59.752 80.015 */
+/* Novelty: 9.22 Fitness: 0.256786 Generation: 2 Individual: 199
+	Point:  82.510 104.957 */
+/* Novelty: 8.36 Fitness: 0.030953 Generation: 2 Individual: 230
+	Point:  26.169 81.315 */
+/* Novelty: 7.61 Fitness: 0.386357 Generation: 3 Individual: 8
+	Point:  115.208 95.499 */
+/* Novelty: 7.52 Fitness: 0.105662 Generation: 3 Individual: 35
+	Point:  50.952 45.640 */
+/* Novelty: 8.36 Fitness: 0.145499 Generation: 3 Individual: 63
+	Point:  54.706 112.202 */
+/* Novelty: 6.16 Fitness: 0.334366 Generation: 3 Individual: 75
+	Point:  102.263 91.015 */
+/* Novelty: 7.97 Fitness: 0.216166 Generation: 3 Individual: 91
+	Point:  91.933 13.864 */
+/* Novelty: 25.64 Fitness: 0.516806 Generation: 4 Individual: 40
+	Point:  148.353 108.415 */
+/* Novelty: 34.05 Fitness: 0.462156 Generation: 4 Individual: 108
+	Point:  155.238 27.530 */
+/* Novelty: 17.70 Fitness: 0.453332 Generation: 6 Individual: 209
+	Point:  133.772 121.762 */
+/* Novelty: 34.45 Fitness: 0.674739 Generation: 6 Individual: 210
+	Point:  192.187 126.125 */
+/* Novelty: 25.10 Fitness: 0.609431 Generation: 6 Individual: 236
+	Point:  173.173 118.415 */
+/* Novelty: 12.73 Fitness: 0.371236 Generation: 7 Individual: 25
+	Point:  111.925 113.761 */
+/* Novelty: 12.99 Fitness: 0.243338 Generation: 7 Individual: 187
+	Point:  85.559 50.575 */
+/* Novelty: 13.62 Fitness: 0.275657 Generation: 7 Individual: 193
+	Point:  89.102 126.250 */
+/* Novelty: 18.62 Fitness: 0.554275 Generation: 7 Individual: 217
+	Point:  160.805 126.992 */
+/* Novelty: 12.20 Fitness: 0.358406 Generation: 7 Individual: 243
+	Point:  109.858 76.135 */
+/* Novelty: 28.35 Fitness: 0.478093 Generation: 10 Individual: 158
+	Point:  170.460 13.753 */
+/* Novelty: 35.27 Fitness: 0.699031 Generation: 11 Individual: 140
+	Point:  218.248 44.409 */
+/* Novelty: 22.90 Fitness: 0.425151 Generation: 11 Individual: 166
+	Point:  136.857 42.404 */
+/* Novelty: 15.79 Fitness: 0.363570 Generation: 13 Individual: 205
+	Point:  133.302 15.689 */
+/* Novelty: 30.13 Fitness: 0.873312 Generation: 16 Individual: 227
+	Point:  238.266 103.885 */
+/* Novelty: 55.87 Fitness: 0.737537 Generation: 17 Individual: 73
+	Point:  286.906 35.959 */
+/* Novelty: 19.41 Fitness: 0.619890 Generation: 18 Individual: 120
+	Point:  175.155 85.656 */
+/* Novelty: 12.41 Fitness: 0.286460 Generation: 19 Individual: 40
+	Point:  101.687 36.011 */
+/* Novelty: 13.45 Fitness: 0.349615 Generation: 24 Individual: 22
+	Point:  121.901 29.254 */
+/* Novelty: 14.33 Fitness: 0.707908 Generation: 25 Individual: 46
+	Point:  196.337 102.677 */
+/* Novelty: 13.69 Fitness: 0.484364 Generation: 26 Individual: 27
+	Point:  140.712 85.267 */
+/* Novelty: 17.80 Fitness: 0.568559 Generation: 28 Individual: 59
+	Point:  169.781 57.451 */
+/* Novelty: 20.66 Fitness: 0.555067 Generation: 31 Individual: 149
+	Point:  185.576 25.974 */
+/* Novelty: 26.05 Fitness: 0.834972 Generation: 37 Individual: 28
+	Point:  234.089 78.911 */
+/* Novelty: 12.52 Fitness: 0.406144 Generation: 39 Individual: 234
+	Point:  124.778 62.991 */
+/* Novelty: 29.15 Fitness: 0.674733 Generation: 47 Individual: 42
+	Point:  236.156 25.218 */
+/* Novelty: 16.99 Fitness: 0.666636 Generation: 49 Individual: 35
+	Point:  193.116 65.852 */
+/* Novelty: 10.10 Fitness: 0.289677 Generation: 51 Individual: 26
+	Point:  93.755 67.287 */
+/* Novelty: 26.46 Fitness: 0.959437 Generation: 54 Individual: 129
+	Point:  267.776 109.992 */
+/* Novelty: 16.53 Fitness: 0.802183 Generation: 55 Individual: 11
+	Point:  222.330 114.820 */
+/* Novelty: 25.52 Fitness: 0.897915 Generation: 56 Individual: 127
+	Point:  259.019 76.696 */
