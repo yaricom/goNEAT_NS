@@ -16,10 +16,15 @@ type AgentRecord struct {
 	Fitness    float64
 	// The flag to indicate whether agent reached maze exit
 	GotExit    bool
-	// The generation of associated individual
+	// The population generation when agent data was collected
 	Generation int
 	// The novelty value associated
 	Novelty    float64
+
+	// The ID of species to whom individual belongs
+	SpeciesID  int
+	// The age of species to whom individual belongs at time of recording
+	SpeciesAge int
 }
 
 // The maze agent records storage

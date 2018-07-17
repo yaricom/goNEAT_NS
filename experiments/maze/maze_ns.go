@@ -183,6 +183,8 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *genetics.Population, epoch *experiments.Generation) (bool, error) {
 	// create record to store simulation results for organism
 	record := AgentRecord{Generation:epoch.Id, AgentID:trialSim.individCounter}
+	record.SpeciesID = org.Species.Id
+	record.SpeciesAge = org.Species.Age
 
 	// evaluate individual organism and get novelty point
 	n_item, err := mazeSimulationEvaluate(ev.Environment, org, &record)
