@@ -8,10 +8,10 @@ import (
 func TestRecordStore_Write_Read(t *testing.T) {
 	rs := new(RecordStore)
 	rs.Records = []AgentRecord{
-		{0, 1, 2, 4, false},
-		{1, 10, 20, 40, false},
-		{2, 11, 21, 41, false},
-		{3, 12, 22, 42, true},
+		{0, 1, 2, 4, false, 1, 0, 1, 1},
+		{1, 10, 20, 40, false, 1, 0, 1, 1},
+		{2, 11, 21, 41, false, 1, 0, 1, 1},
+		{3, 12, 22, 42, true, 1, 0, 1, 1},
 	}
 
 	// the store medium

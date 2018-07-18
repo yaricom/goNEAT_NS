@@ -80,7 +80,7 @@ func TestPoint_Rotate(t *testing.T) {
 
 	p.Rotate(180.0, Point{1.0, 1.0})
 
-	if  1.0 - p.X > 0.00000001 || p.Y != 0.0 {
+	if 1.0 - p.X > 0.00000001 || p.Y != 0.0 {
 		t.Error("Wrong position after rotation", p)
 	}
 }
@@ -96,7 +96,7 @@ func TestPoint_Distance(t *testing.T) {
 
 	p2 := Point{5.0, 3.0}
 	d = p.Distance(p2)
-	if d != math.Sqrt(13.0){
+	if d != math.Sqrt(13.0) {
 		t.Error("Wrong distance", d)
 	}
 }
@@ -189,7 +189,10 @@ func TestReadLine(t *testing.T) {
 	str := "10 20 30 40"
 	lr := strings.NewReader(str)
 
-	line := ReadLine(lr)
+	line, err := ReadLine(lr)
+	if err != nil {
+		t.Error(err)
+	}
 	if line.A.X != 10 {
 		t.Error("line.A.X != 10")
 	}
@@ -237,22 +240,22 @@ func TestReadEnvironment(t *testing.T) {
 	}
 
 	lines := []Line{
-		{Point{293, 7}, Point{289, 130}},
-		{Point{289, 130}, Point{6, 134}},
-		{Point{6, 134}, Point{8, 5}},
-		{Point{8, 5}, Point{292, 7}},
-		{Point{241, 130}, Point{58, 65}},
-		{Point{114, 7}, Point{73, 42}},
+		{Point{5, 5}, Point{295, 5}},
+		{Point{295, 5}, Point{295, 135}},
+		{Point{295, 135}, Point{5, 135}},
+		{Point{5, 135}, Point{5, 5}},
+		{Point{241, 135}, Point{58, 65}},
+		{Point{114, 5}, Point{73, 42}},
 		{Point{130, 91}, Point{107, 46}},
-		{Point{196, 8}, Point{139, 51}},
-		{Point{219, 122}, Point{182, 63}},
-		{Point{267, 9}, Point{214, 63}},
-		{Point{271, 129}, Point{237, 88}},
+		{Point{196, 5}, Point{139, 51}},
+		{Point{219, 125}, Point{182, 63}},
+		{Point{267, 5}, Point{214, 63}},
+		{Point{271, 135}, Point{237, 88}},
 	}
 
 	for i, l := range env.Lines {
 		if lines[i].A.X != l.A.X || lines[i].A.Y != l.A.Y || lines[i].B.X != l.B.X || lines[i].B.Y != l.B.Y {
-			t.Error("Wrong line found", l)
+			t.Errorf("Wrong line found: %.f, expected: %.f\n", l, lines[i])
 		}
 	}
 }
