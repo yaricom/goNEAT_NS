@@ -13,6 +13,7 @@ import (
 	"math/rand"
 	"image"
 	"path"
+	"math"
 )
 
 
@@ -68,7 +69,7 @@ func plotAgentsRecordsBySpecies(records *maze.RecordStore, env *maze.Environment
 	}
 
 	// find best species threshold
-	dist_threshold := env.Hero.Location.Distance(env.MazeExit) * best_threshold
+	dist_threshold := env.Hero.Location.Distance(env.MazeExit) * (1.0 - best_threshold)
 
 
 	// generate color palette and find best species (moved at least 2/3 fom start to exit)
@@ -83,7 +84,7 @@ func plotAgentsRecordsBySpecies(records *maze.RecordStore, env *maze.Environment
 			colors[rec.SpeciesID] = color.RGBA{R:r, G:g, B:b, A:255}
 			n_species++
 		}
-		if env.Hero.Location.Distance(maze.Point{rec.X, rec.Y}) >= dist_threshold {
+		if env.MazeExit.Distance(maze.Point{rec.X, rec.Y}) <= dist_threshold {
 			best_sp_idx[rec.SpeciesID]++
 		}
 	}
@@ -99,11 +100,13 @@ func plotAgentsRecordsBySpecies(records *maze.RecordStore, env *maze.Environment
 	bounds := drawMaze(env, dc)
 	drawMazeCaption(bounds, n_species, n_best_species, best_threshold, true, dc)
 
+	fmt.Println(bounds)
+
 	fmt.Printf("total # of species: %d, # of the best species: %d\n", n_species, n_best_species)
 
 	// draw worst species
 	dc.Push()
-	dc.Translate(0, 150)
+	dc.Translate(0, float64(bounds.Max.Y + 10))
 	for i, v := range best_sp_idx {
 		if v == 0 {
 			plotSpecies(records, dc, i, colors)
@@ -120,9 +123,9 @@ func drawMazeCaption(bounds image.Rectangle, n_species, n_best_species int, b_th
 
 	var str string
 	if best {
-		str = fmt.Sprintf("fit >= %.1f", b_threshold)
+		str = fmt.Sprintf("fit >= %.2f", b_threshold)
 	} else {
-		str = fmt.Sprintf("fit < %.1f", b_threshold)
+		str = fmt.Sprintf("fit < %.2f", b_threshold)
 	}
 	dc.SetColor(color.RGBA{0, 0, 102, 255})
 
@@ -136,38 +139,26 @@ func drawMazeCaption(bounds image.Rectangle, n_species, n_best_species int, b_th
 }
 
 func drawMaze(maze *maze.Environment, dc *gg.Context) image.Rectangle {
-	dc.SetColor(color.RGBA{0, 0, 102, 255})
-
-	min_p, max_p := image.Pt(dc.Width(), dc.Height()), image.Pt(0, 0)
-
-	min := func(p1, p2 image.Point) image.Point {
-		if p1.X <= p2.X && p1.Y <= p2.Y {
-			return p1
-		} else {
-			return p2
-		}
-	}
-	max := func(p1, p2 image.Point) image.Point {
-		if p1.X >= p2.X && p1.Y >= p2.Y {
-			return p1
-		} else {
-			return p2
-		}
-	}
+	min_x, min_y, max_x, max_y := float64(dc.Width()), float64(dc.Height()), 0.0, 0.0
 
 	// draw maze
 	dc.Push()
+	dc.SetColor(color.RGBA{0, 0, 102, 255})
 	dc.SetLineWidth(3.0)
 	dc.SetLineCap(gg.LineCapRound)
 	for _, l := range maze.Lines {
 		dc.DrawLine(l.A.X, l.A.Y, l.B.X, l.B.Y)
 		dc.Stroke()
 
-		min_p = min(min_p, image.Pt(int(l.A.X), int(l.A.Y)))
-		min_p = min(min_p, image.Pt(int(l.B.X), int(l.B.Y)))
+		min_x = math.Min(min_x, l.A.X)
+		min_x = math.Min(min_x, l.B.X)
+		min_y = math.Min(min_y, l.A.Y)
+		min_y = math.Min(min_y, l.B.Y)
 
-		max_p = max(max_p, image.Pt(int(l.A.X), int(l.A.Y)))
-		max_p = max(max_p, image.Pt(int(l.B.X), int(l.B.Y)))
+		max_x = math.Max(max_x, l.A.X)
+		max_x = math.Max(max_x, l.B.X)
+		max_y = math.Max(max_y, l.A.Y)
+		max_y = math.Max(max_y, l.B.Y)
 	}
 	dc.Pop()
 
@@ -188,7 +179,7 @@ func drawMaze(maze *maze.Environment, dc *gg.Context) image.Rectangle {
 	dc.Stroke()
 	dc.Pop()
 
-	return image.Rectangle{Min:min_p, Max:max_p}
+	return image.Rect(int(min_x), int(min_y), int(max_x), int(max_y))
 }
 
 func plotSpecies(records *maze.RecordStore, dc *gg.Context, speciesId int, colors []color.Color) {
