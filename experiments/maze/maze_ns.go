@@ -104,7 +104,8 @@ func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population
 		for _, org := range pop.Organisms {
 			if org.IsWinner {
 				// Prints the winner organism to file!
-				org_path := fmt.Sprintf("%s/%s", outDirForTrial(ev.OutputPath, trialSim.trialID), "mazens_winner")
+				org_path := fmt.Sprintf("%s/%s_%d-%d", outDirForTrial(ev.OutputPath, trialSim.trialID),
+					"mazens_winner", org.Phenotype.NodeCount(), org.Phenotype.LinkCount())
 				file, err := os.Create(org_path)
 				if err != nil {
 					neat.ErrorLog(fmt.Sprintf("Failed to dump winner organism genome, reason: %s\n", err))
