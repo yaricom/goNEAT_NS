@@ -73,8 +73,8 @@ func TestNoveltyArchive_addNoveltyItem(t *testing.T) {
 	org := fillOrganismData(genetics.NewOrganism(0.1, gen, 1), 0.0)
 
 	// test add novelty item
-	item := org.Data.Value.(NoveltyItem)
-	archive.addNoveltyItem(&item)
+	item := org.Data.Value.(*NoveltyItem)
+	archive.addNoveltyItem(item)
 
 	if len(archive.NovelItems) != 1 {
 		t.Errorf("len(archive.NovelItems) != 1, found: %d\n", len(archive.NovelItems))
@@ -132,7 +132,7 @@ func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
 	if archive.NovelItems[0].added == false {
 		t.Error("item.added == false")
 	}
-	item := org.Data.Value.(NoveltyItem)
+	item := org.Data.Value.(*NoveltyItem)
 	if item.added == false {
 		t.Error("org.Data.Value.added == false")
 	}
@@ -200,6 +200,6 @@ func fillOrganismData(org *genetics.Organism, novelty float64) *genetics.Organis
 		Fitness:org.Fitness,
 		Novelty:novelty,
 	}
-	org.Data = &genetics.OrganismData{Value:ni}
+	org.Data = &genetics.OrganismData{Value:&ni}
 	return org
 }
