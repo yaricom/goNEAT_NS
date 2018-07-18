@@ -67,12 +67,16 @@ func NewLine(a, b Point) Line {
 }
 
 // Reads line from specified reader
-func ReadLine(lr io.Reader) Line {
+func ReadLine(lr io.Reader) (*Line, error) {
 	a := Point{}
 	b := Point{}
-	fmt.Fscanf(lr, "%f %f %f %f", &a.X, &a.Y, &b.X, &b.Y)
+	_, err := fmt.Fscanf(lr, "%f %f %f %f", &a.X, &a.Y, &b.X, &b.Y)
+	if err != nil {
+		return nil, err
+	}
 
-	return NewLine(a, b)
+	line := NewLine(a, b)
+	return &line, nil
 }
 
 // To find midpoint of the line segment
@@ -239,13 +243,17 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 
 		default:
 			// read maze line segments
-			if numLines > 0 {
-				env.Lines = append(env.Lines, ReadLine(lr))
-				numLines--
+			line, err := ReadLine(lr)
+			if err == nil {
+				env.Lines = append(env.Lines, *line)
 			}
 		}
 
 		index++
+	}
+
+	if numLines != len(env.Lines) {
+		return nil, errors.New(fmt.Sprintf("Expected: %d maze lines, but was read only: %d", numLines, len(env.Lines)))
 	}
 
 	// update sensors
