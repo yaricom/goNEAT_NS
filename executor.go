@@ -70,12 +70,18 @@ func main() {
 	}
 
 	// Check if output dir exists
-	if _, err := os.Stat(*out_dir_path); err == nil {
+	out_dir := *out_dir_path
+	if _, err := os.Stat(out_dir); err == nil {
+		// backup it
+		back_up_dir := fmt.Sprintf("%s-%s", out_dir, time.Now().Format("2006-01-02T15_04_05"))
 		// clear it
-		os.RemoveAll(*out_dir_path)
+		err = os.Rename(out_dir, back_up_dir)
+		if err != nil {
+			log.Fatal("Failed to do previous results backup: ", err)
+		}
 	}
 	// create output dir
-	err = os.MkdirAll(*out_dir_path, os.ModePerm)
+	err = os.MkdirAll(out_dir, os.ModePerm)
 	if err != nil {
 		log.Fatal("Failed to create output directory: ", err)
 	}
@@ -96,7 +102,7 @@ func main() {
 	var generationEvaluator experiments.GenerationEvaluator
 	if *experiment_name == "MAZENS" {
 		generationEvaluator = maze.MazeNoveltySearchEvaluator{
-			OutputPath:*out_dir_path,
+			OutputPath:out_dir,
 			Environment:environment,
 			NumSpeciesTarget:*species_target,
 			CompatAdjustFreq:*species_compat_adjust_freq,
