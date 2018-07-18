@@ -13,8 +13,8 @@ traditional objective-based fitness optimization functions. One of such problems
 search methods like novelty search may outperform more traditional objective-based search methods. Our goal in this
 research is to test this hypothesis. For more information about Novelty Search optimization please refer to:
 
-* [Novelty Search and the Problem with Objectives](http://eplex.cs.ucf.edu/papers/lehman_gptp11.pdf)
-* [EVOLUTION THROUGH THE SEARCH FOR NOVELTY](http://joellehman.com/lehman-dissertation.pdf)
+* [Novelty Search and the Problem with Objectives][4]
+* [EVOLUTION THROUGH THE SEARCH FOR NOVELTY][5]
 
 #### System Requirements
 
@@ -182,7 +182,7 @@ Where:
 - **in_file** the input file to read genome data from, e.g [seed genome](data/mazestartgenes)
 - **out_file** the output file to write GraphML presentation
 
-### Maze solving agents records visualizer
+### The agents' data records visualizer for maze solving simulations
 
 Allows to visualize recorded data of maze solving agents color coded by species they belong and separated into two groups:
 the best and other.
@@ -215,6 +215,8 @@ Other NEAT implementations may be found at [NEAT Software Catalog][2]
 [1]:http://www.cs.ucf.edu/~kstanley/neat.html
 [2]:http://eplex.cs.ucf.edu/neat_software/
 [3]:https://github.com/yaricom/goNEAT
+[4]:http://eplex.cs.ucf.edu/papers/lehman_gptp11.pdf
+[5]:http://joellehman.com/lehman-dissertation.pdf
 
 
 [seed_genome_graph]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/seed_genome.png "The seed genome graph"
