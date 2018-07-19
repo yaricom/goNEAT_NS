@@ -165,7 +165,7 @@ The hidden neuron #12 which is introduced in seed genome operates as main contro
 
 ![alt text][mazens_medium_winner_records]
 
-Above is a rendering of maze solving simulation by agents controlled by ANNs which is generated from genomes of all organisms
+Above is a rendering of the maze solving simulation by agents controlled with ANNs generated from genomes of all organisms
 introduced into population until winner is found. The agents is *color coded* depending on which species the source organism
 belongs. The fitness of agent is measured as a relative distance between it's final destination and maze exit after running simulation
 for particular number of time steps (400 in our setup).
@@ -205,6 +205,15 @@ the distance to the maze exit.
 
 ![alt text][mazens_hard_winner_records]
 
+Above is the visualization of hard maze solving by all agents until winner is found. The initial agent position is at the
+bottom-left and maze exit at the top-left of the maze. The agents is color coded based on species they belong. So, each
+dot of similar color is the final position of agent controlled by organism belonging to the same species.
+
+The top plot shows final destinations of the most fit agents (fitness >= 0.8) and bottom is the rest. The fitness of agent
+is measured as distance from it's final position to the maze exit after 400 time steps of simulation.
+
+From the plot we can see that winner species produced organisms that control agents in such a way that its final destinations
+is evenly distributed through the maze. As a result it was possible to produce control ANN able to solve the maze.
 
 ## Auxiliary Tools
 
