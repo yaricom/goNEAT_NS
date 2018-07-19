@@ -432,14 +432,15 @@ func (e *Environment) updateRangefinders() error {
 func (e *Environment) updateRadar() {
 	target := e.MazeExit
 
-	// rotate goal with respect to heading of agent
+	// rotate goal with respect to heading of agent to compensate agent's heading angle relative to zero heading angle
 	target.Rotate(-e.Hero.Heading, e.Hero.Location)
 
-	// translate with respect to location of agent
+	// translate with respect to location of agent to compensate agent's position relative to (0,0)
 	target.X -= e.Hero.Location.X
 	target.Y -= e.Hero.Location.Y
 
-	// what angle is the vector between target & agent
+	// what angle is the vector between target & agent (agent is placed into (0,0) with zero heading angle due
+	// to the affine transforms above)
 	angle := target.Angle()
 
 	// fire the appropriate radar sensor
