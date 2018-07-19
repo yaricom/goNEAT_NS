@@ -155,9 +155,9 @@ velocity control).
 
 It's interesting to note hidden neuron #91 which seems to learn complex behaviour of backward moving among the wall at the right
 when exit from the maze detected rightward or behind of the agent. We've made such assumptions because of its connections with input
-sensors #2, #7 (range finders: RIGHT, BACK) and #10, #11 (radar sensors: BACK, RIGHT).
+sensors #2, #7 (range finders: *RIGHT, BACK*) and #10, #11 (radar sensors: *BACK, RIGHT*).
 
-The hidden neuron #293 connected with input sensor #11 (radar sensor: RIGHT) learned to affect agent's steering in the direction
+The hidden neuron #293 connected with input sensor #11 (radar sensor: *RIGHT*) learned to affect agent's steering in the direction
 of maze exit as most of the times it is at the right bottom relative to the agent.
 
 The hidden neuron #12 which is introduced in seed genome operates as main control-and-relay switch relaying signals from sensors
@@ -200,8 +200,8 @@ forward.
 
 Other important point to note is about possible learned behaviour encoded by hidden neuron #297 - it's affected by input
 range finder sensors detecting distance to obstacles at *RIGHT* and *FRONT* direction. Looking at maze configuration we
-may assume that this neuron learned to avoid left chamber trap with extremely strong local optimum for fitness based on
-distance to the maze exit.
+may assume that this neuron learned to avoid left chamber trap with extremely strong local optimum of fitness based on
+the distance to the maze exit.
 
 ![alt text][mazens_hard_winner_records]
 
