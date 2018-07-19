@@ -143,8 +143,9 @@ Where:
 
 ![alt text][mazens_medium_winner_genome_graph]
 
-After 64 generations was found near optimal winner genome configuration able to control maze solving agent. The artificial
-neural network produced by this genome has only 16 units (neurons) with three hidden neurons.
+After 64 generations was found near optimal winner genome configuration able to control maze solving agent and find the exit
+with spatial error about 1.9% at the exit point. The artificial neural network produced by this genome has only 16 units
+(neurons) with three hidden neurons.
 
 During the experiment novelty search optimization resulted in growing two additional hidden units (neurons) and
 introducing recurrent link at the output neuron #13 (angular velocity effector). The recurrent link at that output neuron
@@ -152,7 +153,15 @@ seems to have extreme importance as it's introduced at each winner genome config
 reasonable because neuron #13 effects steering of the agent and need to learn more complex behaviour than neuron #14 (linear
 velocity control).
 
-Introduced genome was able to solve maze and find exit with spatial error about 1.9% at the exit point.
+It's interesting to note hidden neuron #91 which seems to learn complex behaviour of backward moving among wall at the right
+when exit from the maze detected rightward or behind of agent. We made such assumptions because it's connections with input
+sensors #2, #7 (range finders: RIGHT, BACK) and #10, #11 (radar sensors: BACK, RIGHT).
+
+The Hidden neuron #293 connected with input sensor #11 (radar sensor: RIGHT) seems to affect agent's steering in the direction
+of maze exit as most of the times it is at the right bottom relative to the agent.
+
+The hidden neuron #12 which is introduced in seed genome operates as main control-and-relay switch relaying signals from sensors
+ and other hidden neurons to the effectors (neurons #13, #14).
 
 ![alt text][mazens_medium_winner_records]
 
