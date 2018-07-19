@@ -141,11 +141,11 @@ Where:
 - **Mean Diversity** is an average diversity (number of species) per epoch for all epochs
 - **Mean Age** is an average age of surviving species per epoch for all epochs
 
-![alt text][mazens_medium_winner_genome_graph]
-
 After 64 generations was found near optimal winner genome configuration able to control maze solving agent and find the exit
 with spatial error about 1.9% at the exit point. The artificial neural network produced by this genome has only 16 units
 (neurons) with three hidden neurons.
+
+![alt text][mazens_medium_winner_genome_graph]
 
 During the experiment novelty search optimization resulted in growing two additional hidden units (neurons) and
 introducing recurrent link at the output neuron #13 (angular velocity effector). The recurrent link at that output neuron
@@ -153,11 +153,11 @@ seems to have extreme importance as it's introduced at each winner genome config
 reasonable because neuron #13 effects steering of the agent and need to learn more complex behaviour than neuron #14 (linear
 velocity control).
 
-It's interesting to note hidden neuron #91 which seems to learn complex behaviour of backward moving among wall at the right
-when exit from the maze detected rightward or behind of agent. We made such assumptions because it's connections with input
+It's interesting to note hidden neuron #91 which seems to learn complex behaviour of backward moving among the wall at the right
+when exit from the maze detected rightward or behind of the agent. We've made such assumptions because of its connections with input
 sensors #2, #7 (range finders: RIGHT, BACK) and #10, #11 (radar sensors: BACK, RIGHT).
 
-The Hidden neuron #293 connected with input sensor #11 (radar sensor: RIGHT) seems to affect agent's steering in the direction
+The hidden neuron #293 connected with input sensor #11 (radar sensor: RIGHT) learned to affect agent's steering in the direction
 of maze exit as most of the times it is at the right bottom relative to the agent.
 
 The hidden neuron #12 which is introduced in seed genome operates as main control-and-relay switch relaying signals from sensors
@@ -187,22 +187,21 @@ go run executor.go -out ./out/hard_mazens -context ./data/maze.neat -genome ./da
 ![alt text][mazens_hard_winner_genome_graph]
 
 After 109 generations of population was found near optimal winner genome configuration able to guide maze solving agent through
-hard maze. The artificial neural network produced by this genome has only 17 units (neurons) with four hidden neurons.
+hard maze and approach the maze exit with spatial error of 2.5%. The artificial neural network produced by this genome
+has only 17 units (neurons) with four hidden neurons to model complex learned behaviour.
 
 The optimal genome configuration produced by growing three additional hidden units and multiple new links compared to seed
 genome. It's interesting to note that recurrent link at output neuron #13 (angular velocity effector) was routed through
 two hidden neurons in contrast with medium maze where neuron #13 was simply linked to itself. This may result in more complex
-behaviour learned especially taking into account that link pass through neuron #42 (affected by range finder: UP; radar: LEFT)
-and neuron #12 which is introduced at the seed genome and serves as *main relay control unit* relaying input signals from
-all input (sensor) neurons to all output (effector) neurons.
-
-It worth to mention about special role of mentioned neuron #42 which seems to encode complex learned behaviour about general
-direction to the maze exit point.
+behaviour learned especially taking into account that link pass through neuron #42 affected by range finder: *LEFT* and radar: *BACK*.
+The neuron #42 also affected by connection with neuron #643 (affected by range finder: *LEFT*). As a result we may assume that
+it learned how steer agent when maze exit is behind and wall is at the left of it, i.e. to follow the left wall by moving
+forward.
 
 Other important point to note is about possible learned behaviour encoded by hidden neuron #297 - it's affected by input
-range finder sensors detecting distance to obstacles at *DOWN* and *DOWN-RIGHT* direction. Looking at maze configuration it
-can be seen that most trapping cul-de-sacs can be escaped by moving exactly in this direction. So, we can assume that this
-neuron participates in strategy to avoid vertical traps with local optimum fitness values based on distance to the exit.
+range finder sensors detecting distance to obstacles at *RIGHT* and *FRONT* direction. Looking at maze configuration we
+may assume that this neuron learned to avoid left chamber trap with extremely strong local optimum for fitness based on
+distance to the maze exit.
 
 ![alt text][mazens_hard_winner_records]
 
