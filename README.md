@@ -153,8 +153,8 @@ seems to have extreme importance as it's introduced at each winner genome config
 reasonable because neuron #13 effects steering of the agent and need to learn more complex behaviour than neuron #14 (linear
 velocity control).
 
-It's interesting to note hidden neuron #91 which seems to learn complex behaviour of backward moving among the wall at the right
-when exit from the maze detected rightward or behind of the agent. We've made such assumptions because of its connections with input
+It's interesting to note hidden neuron #91 which seems to learn complex behaviour of steering to the maze exit
+when it is detected rightward or behind of the agent. We've made such assumptions because of its connections with input
 sensors #2, #7 (range finders: *RIGHT, BACK*) and #10, #11 (radar sensors: *BACK, RIGHT*).
 
 The hidden neuron #293 connected with input sensor #11 (radar sensor: *RIGHT*) learned to affect agent's steering in the direction
@@ -222,7 +222,7 @@ During this project development was created several tools to help with results v
 ### Genome to GraphML converter
 
 Helps with conversion of genome data into GraphML to render genome as a graph with help of specialized software such as
-(Cytoscape)[http://www.cytoscape.org]
+[Cytoscape](http://www.cytoscape.org)
 
 Use following command to run it:
 ```bash
