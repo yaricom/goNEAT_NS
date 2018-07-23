@@ -69,7 +69,7 @@ func plotAgentsRecordsBySpecies(records *maze.RecordStore, env *maze.Environment
 	}
 
 	// find best species threshold
-	dist_threshold := env.Hero.Location.Distance(env.MazeExit) * (1.0 - best_threshold)
+	dist_threshold := env.AgentDistanceToExit() * (1.0 - best_threshold)
 
 
 	// generate color palette and find best species (moved at least 2/3 fom start to exit)
