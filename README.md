@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/yaricom/goNEAT_NS.svg?branch=master)](https://travis-ci.org/yaricom/goNEAT_NS) [![GoDoc](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns?status.svg)](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns)
+
 ## Overview
 
 This repository provides implementation of [Neuro-Evolution of Augmented Topologies (NEAT)][1] with Novelty Search
