@@ -197,19 +197,22 @@ func NewAgent() Agent {
 // The maze environment class
 type Environment struct {
 	// The maze navigating agent
-	Hero       Agent
+	Hero            Agent
 	// The maze line segments
-	Lines      []Line
+	Lines           []Line
 	// The maze exit - goal
-	MazeExit   Point
+	MazeExit        Point
 
 	// The flag to indicate if exit was found
-	ExitFound  bool
+	ExitFound       bool
 
 	// The number of time steps to be executed during maze solving simulation
-	TimeSteps  int
+	TimeSteps       int
 	// The sample step size to determine when to collect subsequent samples during simulation
-	SampleSize int
+	SampleSize      int
+
+	// The range around maze exit point to test if agent coordinates is within to be considered as solved successfully (5.0 is good enough)
+	ExitFoundRange  float64
 
 	// The initial distance of agent from exit
 	initialDistance float64
@@ -264,7 +267,7 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 	env.updateRadar()
 
 	// find initial distance
-	env.initialDistance, err = env.agentDistanceToExit()
+	env.initialDistance = env.AgentDistanceToExit()
 
 	return &env, err
 }
@@ -367,19 +370,29 @@ func (e *Environment) Update() error {
 	}
 	e.updateRadar()
 
+	// Test if update agent's position solved the maze
+	e.testExitFoundByAgent()
+
 	return nil
 }
 
+// Used to test if agent location is within maze exit range
+func (e *Environment) testExitFoundByAgent() bool {
+	if e.ExitFound {
+		return true
+	}
+
+	dist := e.AgentDistanceToExit()
+	if dist < e.ExitFoundRange {
+		e.ExitFound = true
+	}
+
+	return e.ExitFound
+}
+
 // used for fitness calculations based on distance of maze Agent to the target maze exit
-func (e *Environment) agentDistanceToExit() (float64, error) {
-	dist := e.Hero.Location.Distance(e.MazeExit)
-	if math.IsNaN(dist) {
-		return 500, errors.New("NAN Distance error...")
-	}
-	if dist < 5.0 {
-		e.ExitFound = true //if within 5 units, success!
-	}
-	return dist, nil
+func (e *Environment) AgentDistanceToExit() float64 {
+	return e.Hero.Location.Distance(e.MazeExit)
 }
 
 // update rangefinder sensors
