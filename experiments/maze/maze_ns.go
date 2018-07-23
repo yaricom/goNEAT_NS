@@ -181,6 +181,7 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	}
 }
 
+// Evaluates individual organism against maze environment and returns true if organism was able to solve maze by navigating to exit
 func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *genetics.Population, epoch *experiments.Generation) (bool, error) {
 	// create record to store simulation results for organism
 	record := AgentRecord{Generation:epoch.Id, AgentID:trialSim.individCounter}
@@ -188,13 +189,13 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 	record.SpeciesAge = org.Species.Age
 
 	// evaluate individual organism and get novelty point
-	n_item, err := mazeSimulationEvaluate(ev.Environment, org, &record)
+	n_item, solved, err := mazeSimulationEvaluate(ev.Environment, org, &record)
 	if err != nil {
 		return false, err
 	}
 	n_item.IndividualID = org.Genotype.Id
 	org.Data = &genetics.OrganismData{Value:n_item}  // store novelty item within organism data
-	org.IsWinner = record.GotExit // store if maze was solved
+	org.IsWinner = solved // store if maze was solved
 	org.Error = 1 - n_item.Fitness // error value consider how far  we are from exit normalized to (0;1] range
 
 	// calculate novelty of new individual within archive of known novel items
@@ -210,5 +211,5 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 	// update fittest organisms list
 	trialSim.archive.UpdateFittestWithOrganism(org)
 
-	return org.IsWinner, nil
+	return solved, nil
 }
