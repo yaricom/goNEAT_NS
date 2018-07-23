@@ -37,36 +37,40 @@ func outDirForTrial(outDir string, trialID int) string {
 }
 
 
-// To evaluate an individual organism within provided maze environment and to create corresponding novelty point
-func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *AgentRecord) (*neatns.NoveltyItem, error) {
+// To evaluate an individual organism within provided maze environment and to create corresponding novelty point.
+// If maze was solved during simulation the second returned parameter will be true.
+func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *AgentRecord) (*neatns.NoveltyItem, bool, error) {
 	n_item := neatns.NewNoveltyItem()
 
 	// initialize maze simulation's environment specific to the provided organism - this will be a copy
 	// of primordial environment provided
 	org_env, err := mazeSimulationInit(*env, org)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	// do specified amount of time steps emulations
-	for i := 0; i < org_env.TimeSteps; i++ {
+	// do specified amount of time steps emulations or while exit not found
+	steps := 0
+	for i := 0; i < org_env.TimeSteps && !org_env.ExitFound; i++ {
 		err := mazeSimulationStep(org_env, org)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		// store agent path points at given sample size
 		if (org_env.TimeSteps - i) % org_env.SampleSize == 0 {
 			n_item.Data = append(n_item.Data, org_env.Hero.Location.X)
 			n_item.Data = append(n_item.Data, org_env.Hero.Location.Y)
 		}
+		steps++
+	}
+
+	if org_env.ExitFound {
+		neat.InfoLog(fmt.Sprintf("Maze solved in: %d steps\n", steps))
 	}
 
 	// calculate fitness of an organism as closeness to target
-	fitness, err := org_env.agentDistanceToExit()
-	if err != nil {
-		neat.ErrorLog("failed to estimate organism fitness by its final distance to exit")
-		return nil, err
-	}
+	fitness := org_env.AgentDistanceToExit()
+
 	// normalize fitness value in range (0;1] and store it
 	fitness = (env.initialDistance - fitness) / env.initialDistance
 	if fitness < 0 {
@@ -86,7 +90,7 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 		record.GotExit = org_env.ExitFound
 	}
 
-	return n_item, nil
+	return n_item, org_env.ExitFound, nil
 }
 
 
