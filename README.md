@@ -257,11 +257,11 @@ Mean
 
 After 248 generations of population was found near optimal winner genome configuration able to guide maze solving agent through
 medium maze and approach the maze exit with spatial error of 1.8%. The artificial neural network produced by this genome
-has 22 units (neurons) with four hidden neurons to model complex learned behaviour.
+has 22 units (neurons) with nine hidden neurons to model complex learned behaviour.
 
 The genotype of the winning agent presented above has more complicated structure compared to the near optimal genome created
-by *Novelty Search* based optimization from the first experiment with more redundant neurons and links. Due to added complexity
-produced organism is less energy efficient and harder to execute at inference time.
+by *Novelty Search* based optimization from the first experiment with more redundant neurons and links. Due to added
+complexity, the produced organism is less energy efficient and harder to execute at the inference time.
 
 
 ![alt text][mazeobj_medium_winner_records]
@@ -273,7 +273,7 @@ simulation for particular number of time steps (400 in our setup).
 
 The initial agent position is at the top-left corner marked with green circle and maze exit at the bottom-right marked with red circle.
 
-By comparing with simulation based on Novelty Search optimization it may be seen that agent's final destinations is less
+By comparing it with simulation based on Novelty Search optimization it may be seen that agent's final destinations is less
 evenly distributed through the maze space and some areas left completely unexplored.
 
 
