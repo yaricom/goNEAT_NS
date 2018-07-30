@@ -33,22 +33,6 @@ type MazeNoveltySearchEvaluator struct {
 	CompatAdjustFreq int
 }
 
-// The structure to hold maze simulator evaluation results
-type mazeSimResults struct {
-	// The record store for evaluated agents
-	records        *RecordStore
-	// The novelty archive
-	archive        *neatns.NoveltyArchive
-
-	// The current trial
-	trialID        int
-	// The evaluated individuals counter within current trial
-	individCounter int
-}
-
-// The simulation results for one trial
-var trialSim mazeSimResults
-
 // Invoked before new trial run started
 func (ev MazeNoveltySearchEvaluator) TrialRunStarted(trial *experiments.Trial) {
 	trialSim = mazeSimResults{

@@ -11,6 +11,22 @@ import (
 	"log"
 )
 
+// The simulation results for one trial
+var trialSim mazeSimResults
+
+// The structure to hold maze simulator evaluation results
+type mazeSimResults struct {
+	// The record store for evaluated agents
+	records        *RecordStore
+	// The novelty archive
+	archive        *neatns.NoveltyArchive
+
+	// The current trial
+	trialID        int
+	// The evaluated individuals counter within current trial
+	individCounter int
+}
+
 // calculates item-wise difference between two vectors
 func histDiff(in1, in2 []float64) float64 {
 	size := len(in1)
