@@ -20,7 +20,7 @@ func main() {
 	var context_path = flag.String("context", "./data/maze.neat", "The execution context configuration file.")
 	var genome_path = flag.String("genome", "./data/mazestartgenes", "The seed genome to start with.")
 	var maze_config_path = flag.String("maze", "./data/medium_maze.txt", "The maze environment configuration file.")
-	var experiment_name = flag.String("experiment", "MAZENS", "The name of experiment to run. [MAZENS]")
+	var experiment_name = flag.String("experiment", "MAZENS", "The name of experiment to run. [MAZENS, MAZEOBJ]")
 	var time_steps = flag.Int("timesteps", 400, "The number of time steps for maze simulation per organism.")
 	var time_steps_sample = flag.Int("timesteps_sample", 1000, "The sample size to store agent path when doing maze simulation.")
 	var species_target = flag.Int("species_target", 20, "The target number of species to maintain.")
@@ -109,6 +109,15 @@ func main() {
 			NumSpeciesTarget:*species_target,
 			CompatAdjustFreq:*species_compat_adjust_freq,
 		}
+	} else if *experiment_name == "MAZEOBJ" {
+		generationEvaluator = maze.MazeObjectiveEvaluator{
+			OutputPath:out_dir,
+			Environment:environment,
+			NumSpeciesTarget:*species_target,
+			CompatAdjustFreq:*species_compat_adjust_freq,
+		}
+	} else {
+		log.Fatalf("Unsupported experiment name requested: %s\n", *experiment_name)
 	}
 
 	err = experiment.Execute(context, start_genome, generationEvaluator)
