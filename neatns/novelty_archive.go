@@ -152,8 +152,8 @@ func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
 
 // prints collected individuals with maximal fitness
 func (a *NoveltyArchive) PrintFittest(w io.Writer) error {
-	if len(a.NovelItems) == 0 {
-		return errors.New("No novel items to print!!!")
+	if len(a.FittestItems) == 0 {
+		return errors.New("No fittest items to print!!!")
 	}
 	for _, f := range a.FittestItems {
 		str := f.String()
