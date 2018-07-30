@@ -130,7 +130,7 @@ func (ev *MazeObjectiveEvaluator) storeRecorded() {
 	np_path := fmt.Sprintf("%s/fittest_archive_points.txt", outDirForTrial(ev.OutputPath, trialSim.trialID))
 	np_file, err := os.Create(np_path)
 	if err == nil {
-		trialSim.archive.PrintFittest(np_file)
+		err = trialSim.archive.PrintFittest(np_file)
 	}
 	if err != nil {
 		neat.ErrorLog(fmt.Sprintf("Failed to print fittest  points from archive, reason: %s\n", err))
