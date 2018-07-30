@@ -94,15 +94,15 @@ We will execute experiments within maze configurations of two difficulty levels:
 * medium difficulty map
 * hard difficulty map
 
-### 1. The Maze Navigation with Novelty Search optimization
+### 1. The Maze Navigation with Novelty Search Optimization
 
 In this experiment evaluated the performance of maze agent controlled by ANN which is created by NEAT algorithm with
 Novelty Search based optimization. The mentioned optimization is based on *novelty metric* calculation for each agent
 after particular time steps of maze navigation simulation for that agent is performed. The novelty metric biases the
 search in a fundamentally different way than the objective-based fitness function based on distance from agent to exit.
 The novelty metric determines the behavior-space through which search will proceed. Therefore, because what is important
-in a maze is where the traverser ends, for the maze domain, the behavior of a navigator is defined as its ending position.
-The novelty metric is then the squared Euclidean distance between the ending positions of two individuals.
+in a maze is where the solving agent ends, for the maze domain, the behavior of a navigator is defined as its ending position.
+The novelty metric is then the N-nearest neighbor distance novelty between the ending positions of all known solving agents.
 
 
 The effect of this novelty metric is to reward the robot for ending in a place where none have ended before; the method
@@ -217,6 +217,66 @@ is measured as distance from it's final position to the maze exit after 400 time
 From the plot we can see that winner species produced organisms that control agents in such a way that its final destinations
 is evenly distributed through the maze. As a result it was possible to produce control ANN able to solve the maze.
 
+
+### 2. The Maze Navigation with Objective-Based Fitness Optimization
+
+In this experiment evaluated the performance of maze agent controlled by ANN which is created by NEAT algorithm with
+*objective-based fitness* optimization. The mentioned optimization is based on maximizing solving agent's fitness by following
+its objective, i.e. the distance from agent to exit. As with previous experiment the behavior of a navigator is defined as its
+ending position in a maze. The fitness function is then the squared Euclidean distance between the ending position of the agent
+and maze exit.
+
+The effect of this fitness function is to reward the solving agent for ending in a place as close to the maze exit as possible.
+
+#### To run experiment with medium difficulty maze map execute following commands:
+```bash
+
+cd $GOPATH/src/github.com/yaricom/goNEAT_NS
+go run executor.go -out ./out/mazeobj -context ./data/maze.neat -genome ./data/mazestartgenes -maze ./data/medium_maze.txt -experiment MAZEOBJ
+
+```
+Where: ./data/maze.neat is the configuration of NEAT execution context, ./data/mazestartgenes is the start genome
+configuration, and ./data/medium_maze.txt is a maze environment configuration.
+
+This command will execute one trial with 2000 generations (or less if winner is found) over population of 250 organisms.
+
+The experiment results will be similar to the following:
+
+```
+Average
+	Winner Nodes:	22.0
+	Winner Genes:	49.0
+	Winner Evals:	62168.0
+Mean
+	Complexity:	44.6
+	Diversity:	27.5
+	Age:		222.0
+```
+
+![alt text][mazeobj_medium_winner_genome_graph]
+
+After 248 generations of population was found near optimal winner genome configuration able to guide maze solving agent through
+medium maze and approach the maze exit with spatial error of 1.8%. The artificial neural network produced by this genome
+has 22 units (neurons) with four hidden neurons to model complex learned behaviour.
+
+The genotype of the winning agent presented above has more complicated structure compared to the near optimal genome created
+by *Novelty Search* based optimization from the first experiment with more redundant neurons and links. Due to added complexity
+produced organism is less energy efficient and harder to execute at inference time.
+
+
+![alt text][mazeobj_medium_winner_records]
+
+Above is a rendering of the maze solving simulation by agents controlled with ANNs generated from genomes of all organisms
+introduced into population until winner is found. The agents is color coded depending on which species the source organism
+belongs. The fitness of agent is measured as a relative distance between it's final destination and maze exit after running
+simulation for particular number of time steps (400 in our setup).
+
+The initial agent position is at the top-left corner marked with green circle and maze exit at the bottom-right marked with red circle.
+
+By comparing with simulation based on Novelty Search optimization it may be seen that agent's final destinations is less
+evenly distributed through the maze space and some areas left completely unexplored.
+
+
 ## Auxiliary Tools
 
 During this project development was created several tools to help with results visualization and pre-/post-processing.
@@ -276,7 +336,12 @@ Other NEAT implementations may be found at [NEAT Software Catalog][2]
 
 
 [seed_genome_graph]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/seed_genome.png "The seed genome graph"
+
 [mazens_medium_winner_genome_graph]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/NS_medium_16/mazens_winner_16.png "The graph for near optimal winner genome generated by novelty search for medium maze"
-[mazens_medium_winner_records]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/NS_medium_16/ns_medium_maze_16.png "The plot of maze agent records for medium maze"
+[mazens_medium_winner_records]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/NS_medium_16/ns_medium_maze_16.png "The plot of maze agent records for medium maze when novelty search optimization applied"
+
 [mazens_hard_winner_genome_graph]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/NS_hard_17/17_hard_mazens_winner.png "The graph for near optimal winner genome generated by novelty search for hard maze"
-[mazens_hard_winner_records]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/NS_hard_17/17_ns_hard_maze.png "The plot of maze agent records for hard maze"
+[mazens_hard_winner_records]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/NS_hard_17/17_ns_hard_maze.png "The plot of maze agent records for hard maze when novelty search optimization applied"
+
+[mazeobj_medium_winner_genome_graph]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/OBJ_medium_22/22_maze_obj_winner.png "The graph for near optimal winner genome generated by objective-based fitness optimization for medium maze"
+[mazeobj_medium_winner_records]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/OBJ_medium_22/22_obj_medium_maze.png "The plot of maze agent records for medium maze when objective-based fitness optimization applied"
