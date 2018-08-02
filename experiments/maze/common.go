@@ -7,8 +7,6 @@ import (
 	"github.com/yaricom/goNEAT/neat/genetics"
 	"github.com/yaricom/goNEAT_NS/neatns"
 	"math"
-	"os"
-	"log"
 )
 
 // The simulation results for one trial
@@ -36,20 +34,6 @@ func histDiff(in1, in2 []float64) float64 {
 		diff_accum += math.Abs(diff)
 	}
 	return diff_accum / float64(size)
-}
-
-// To provide standard output directory syntax based on current trial
-// Method checks if directory should be created
-func outDirForTrial(outDir string, trialID int) string {
-	dir := fmt.Sprintf("%s/%d", outDir, trialID)
-	if _, err := os.Stat(dir); err != nil {
-		// create output dir
-		err := os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			log.Fatal("Failed to create output directory: ", err)
-		}
-	}
-	return dir
 }
 
 

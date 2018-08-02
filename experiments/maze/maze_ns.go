@@ -74,7 +74,7 @@ func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population
 
 	// Only print to file every print_every generations
 	if epoch.Solved || epoch.Id % context.PrintEvery == 0 || epoch.Id == context.NumGenerations - 1 {
-		pop_path := fmt.Sprintf("%s/gen_%d", outDirForTrial(ev.OutputPath, trialSim.trialID), epoch.Id)
+		pop_path := fmt.Sprintf("%s/gen_%d", experiments.OutDirForTrial(ev.OutputPath, trialSim.trialID), epoch.Id)
 		file, err := os.Create(pop_path)
 		if err != nil {
 			neat.ErrorLog(fmt.Sprintf("Failed to dump population, reason: %s\n", err))
@@ -88,7 +88,7 @@ func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population
 		for _, org := range pop.Organisms {
 			if org.IsWinner {
 				// Prints the winner organism to file!
-				org_path := fmt.Sprintf("%s/%s_%d-%d", outDirForTrial(ev.OutputPath, trialSim.trialID),
+				org_path := fmt.Sprintf("%s/%s_%d-%d", experiments.OutDirForTrial(ev.OutputPath, trialSim.trialID),
 					"mazens_winner", org.Phenotype.NodeCount(), org.Phenotype.LinkCount())
 				file, err := os.Create(org_path)
 				if err != nil {
@@ -135,7 +135,7 @@ func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population
 
 func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	// store recorded agents' performance
-	rec_path := fmt.Sprintf("%s/record.dat", outDirForTrial(ev.OutputPath, trialSim.trialID))
+	rec_path := fmt.Sprintf("%s/record.dat", experiments.OutDirForTrial(ev.OutputPath, trialSim.trialID))
 	rec_file, err := os.Create(rec_path)
 	if err == nil {
 		err = trialSim.records.Write(rec_file)
@@ -145,7 +145,7 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	}
 
 	// print collected novelty points from archive
-	np_path := fmt.Sprintf("%s/novelty_archive_points.txt", outDirForTrial(ev.OutputPath, trialSim.trialID))
+	np_path := fmt.Sprintf("%s/novelty_archive_points.txt", experiments.OutDirForTrial(ev.OutputPath, trialSim.trialID))
 	np_file, err := os.Create(np_path)
 	if err == nil {
 		err = trialSim.archive.PrintNoveltyPoints(np_file)
@@ -155,7 +155,7 @@ func (ev *MazeNoveltySearchEvaluator) storeRecorded() {
 	}
 
 	// print novelty points with maximal fitness
-	np_path = fmt.Sprintf("%s/fittest_novelty_archive_points.txt", outDirForTrial(ev.OutputPath, trialSim.trialID))
+	np_path = fmt.Sprintf("%s/fittest_novelty_archive_points.txt", experiments.OutDirForTrial(ev.OutputPath, trialSim.trialID))
 	np_file, err = os.Create(np_path)
 	if err == nil {
 		err = trialSim.archive.PrintFittest(np_file)
