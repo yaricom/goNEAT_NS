@@ -126,23 +126,19 @@ func main() {
 	}
 
 	// Find winner statistics
-	avg_nodes, avg_genes, avg_evals := experiment.AvgWinnerNGE()
-
-	fmt.Printf("\nAverage\n\tWinner Nodes:\t%.1f\n\tWinner Genes:\t%.1f\n\tWinner Evals:\t%.1f\n",
-		avg_nodes, avg_genes, avg_evals)
-	mean_complexity, mean_diversity, mean_age := 0.0, 0.0, 0.0
-	for _, t := range experiment.Trials {
-		mean_complexity += t.Complexity().Mean()
-		mean_diversity += t.Diversity().Mean()
-		mean_age += t.Age().Mean()
-	}
-	count := float64(len(experiment.Trials))
-	mean_complexity /= count
-	mean_diversity /= count
-	mean_age /= count
-	fmt.Printf("Mean\n\tComplexity:\t%.1f\n\tDiversity:\t%.1f\n\tAge:\t\t%.1f\n", mean_complexity, mean_diversity, mean_age)
+	experiment.PrintStatistics()
 
 	fmt.Printf(">>> Start genome file:  %s\n", *genome_path)
 	fmt.Printf(">>> Configuration file: %s\n", *context_path)
 	fmt.Printf(">>> Maze environment file: %s\n", *maze_config_path)
+
+	// Save experiment data
+	expResPath := fmt.Sprintf("%s/%s.dat", out_dir, *experiment_name)
+	expResFile, err := os.Create(expResPath)
+	if err == nil {
+		err = experiment.Write(expResFile)
+	}
+	if err != nil {
+		log.Fatal("Failed to save experiment results", err)
+	}
 }
