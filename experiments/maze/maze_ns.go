@@ -45,19 +45,18 @@ func (ev MazeNoveltySearchEvaluator) TrialRunStarted(trial *experiments.Trial) {
 // This method evaluates one epoch for given population and prints results into output directory if any.
 func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population, epoch *experiments.Generation, context *neat.NeatContext) (err error) {
 	// Evaluate each organism on a test
-	for _, org := range pop.Organisms {
+	for i, org := range pop.Organisms {
 		res, err := ev.orgEvaluate(org, pop, epoch)
 		if err != nil {
 			return err
 		}
-		if res {
+		pop.Organisms[i].Fitness = org.Data.Value.(*neatns.NoveltyItem).Fitness // store fitness based on objective proximity for statistical purposes
+		if res && (epoch.Best == nil || org.Fitness > epoch.Best.Fitness) {
 			epoch.Solved = true
 			epoch.WinnerNodes = len(org.Genotype.Nodes)
 			epoch.WinnerGenes = org.Genotype.Extrons()
 			epoch.WinnerEvals = trialSim.individCounter
 			epoch.Best = org
-
-			break // we have a winner
 		}
 		if org.Data == nil {
 			return errors.New(fmt.Sprintf("Novelty point not found at organism: %s", org))
@@ -67,10 +66,6 @@ func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population
 	// Fill statistics about current epoch
 	epoch.FillPopulationStatistics(pop)
 
-	// adjust archive settings
-	trialSim.archive.EndOfGeneration()
-	//refresh generation's novelty scores
-	trialSim.archive.EvaluatePopulationNovelty(pop, true)
 
 	// Only print to file every print_every generations
 	if epoch.Solved || epoch.Id % context.PrintEvery == 0 || epoch.Id == context.NumGenerations - 1 {
@@ -106,6 +101,11 @@ func (ev MazeNoveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population
 		// the last epoch executed
 		ev.storeRecorded()
 	} else {
+		// adjust archive settings
+		trialSim.archive.EndOfGeneration()
+		//refresh generation's novelty scores
+		trialSim.archive.EvaluatePopulationNovelty(pop, true)
+
 		speciesCount := len(pop.Species)
 
 		// adjust species count by keeping it constant
