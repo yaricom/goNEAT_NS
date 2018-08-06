@@ -40,14 +40,12 @@ func (ev MazeObjectiveEvaluator) GenerationEvaluate(pop *genetics.Population, ep
 		if err != nil {
 			return err
 		}
-		if res {
+		if res && (epoch.Best == nil || org.Fitness > epoch.Best.Fitness) {
 			epoch.Solved = true
 			epoch.WinnerNodes = len(org.Genotype.Nodes)
 			epoch.WinnerGenes = org.Genotype.Extrons()
 			epoch.WinnerEvals = trialSim.individCounter
 			epoch.Best = org
-
-			break // we have a winner
 		}
 	}
 
