@@ -13,10 +13,7 @@ both: optimal connections weights and topology for given task (number of NN node
 The Novelty Search optimization allows to solve deceptive tasks with strong local optima which can not be solved by
 traditional objective-based fitness optimization functions. One of such problems is maze navigation where non-objective
 search methods like novelty search may outperform more traditional objective-based search methods. Our goal in this
-research is to test this hypothesis. For more information about Novelty Search optimization please refer to:
-
-* [Novelty Search and the Problem with Objectives][4]
-* [EVOLUTION THROUGH THE SEARCH FOR NOVELTY][5]
+research is to test this hypothesis.
 
 #### System Requirements
 
@@ -298,6 +295,135 @@ Above is renderings of hard maze solving agents' final destinations for several 
 the renderings looks similar and by examining them it can be easy detected mentioned local optima traps which prevent any
 produced organism from solving hard maze configuration.
 
+
+## Discussion
+
+In this work we have tested two approaches to perform fitness function optimization with NEAT algorithm: novelty search and
+objective-based. The novelty search optimization was found as outperforming method for solving of deceptive tasks when strong local
+optima present, such as maze solving. Our experiments based on two maze environments configurations: medium and hard maze.
+
+### Medium maze results
+
+With medium maze configuration both fitness function optimization methods was able to produce agents able to solve the maze:
+
+* the Novelty Search based agent was able to solve maze in ten from ten trials
+* the Objective-Based agent was able to solve medium maze in nine from ten trials
+
+The novelty search optimization also resulted in producing more energy efficient and elegant genome for solver agent. The
+absolute winner with NS optimization has only 15 neurons with 19 links between (Fitness: 0.984) compared to objective-based
+optimization where best agent has 60 neurons with 214 links between (Fitness: 0.987). The provided fitness value describe
+how close final agent's position to the maze exit after 400 time steps (where 1.0 means exact match). Full statistics of
+experiment provided further.
+
+Medium Maze Objective-Based:
+============================
++++ Solved 9 trials from 10 +++
+
+Champion found in 3 trial run
+	Winner Nodes:	60
+	Winner Genes:	214
+	Winner Evals:	235020
+
+	Diversity:	26
+	Complexity:	274
+	Age:		320
+	Fitness:	1.0
+
+Average among winners
+	Winner Nodes:	34.0
+	Winner Genes:	110.2
+	Winner Evals:	160756.8
+
+	Diversity:	20.1
+	Complexity:	144.2
+	Age:		251.0
+	Fitness:	1.0
+
+Averages for all organisms evaluated during experiment
+	Diversity:	18.5
+	Complexity:	105.5
+	Age:		165.5
+	Fitness:	0.8
+
+Medium Maze Novelty Search:
+============================
++++ Solved 10 trials from 10 +++
+
+Champion found in 3 trial run
+	Winner Nodes:	15
+	Winner Genes:	19
+	Winner Evals:	13838
+
+	Diversity:	23
+	Complexity:	34
+	Age:		45
+	Fitness:	1.0
+
+Average among winners
+	Winner Nodes:	17.1
+	Winner Genes:	29.1
+	Winner Evals:	25132.1
+
+	Diversity:	23.0
+	Complexity:	46.2
+	Age:		78.2
+	Fitness:	1.0
+
+Averages for all organisms evaluated during experiment
+	Diversity:	17.6
+	Complexity:	43.5
+	Age:		41.1
+	Fitness:	0.5
+
+### Hard maze results
+
+With hard maze configuration objective-based optimization method *failed to produce any agent able to solve this maze.*
+At the same time Novelty Search based optimization able to avoid deceptive strong local optima introduced in hard maze
+and produce effective solver agents in less than 300 generations over the same ten trial executions.
+
+Hard Maze Novelty Search:
+============================
++++ Solved 10 trials from 10 +++
+
+Champion found in 4 trial run
+	Winner Nodes:	27
+	Winner Genes:	66
+	Winner Evals:	64314
+
+	Diversity:	27
+	Complexity:	93
+	Age:		235
+	Fitness:	1.0
+
+Average among winners
+	Winner Nodes:	17.6
+	Winner Genes:	34.2
+	Winner Evals:	29530.9
+
+	Diversity:	25.6
+	Complexity:	51.8
+	Age:		75.5
+	Fitness:	1.0
+
+Averages for all organisms evaluated during experiment
+	Diversity:	18.6
+	Complexity:	46.4
+	Age:		42.7
+	Fitness:	0.3
+
+### Conclusion
+
+As it was shown by experimental data, the Novelty Search optimization, where fitness of agent is based on novelty of the solution
+it was able to find, considerably outperforms traditional objective-based optimization and even was able to solve task where
+traditional method failed completely.
+
+We believe that novelty search optimization can be successfully applied to produce optimal solving agents in many areas where
+ strong deceptive local fitness optima is blocking traditional objective-based methods from finding optimal or any solutions.
+
+For more information about Novelty Search optimization please refer to original works:
+
+* [Novelty Search and the Problem with Objectives][4]
+* [EVOLUTION THROUGH THE SEARCH FOR NOVELTY][5]
 
 ## Auxiliary Tools
 
