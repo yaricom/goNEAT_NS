@@ -108,7 +108,8 @@ rather than the method of locomotion. Thus, although the novelty metric has no k
 that reaches the goal can appear novel. In addition, the comparison between fitness-based and novelty-based search is
 fair because both scores are computed only based on the distance of the final position of the robot from other points.
 
-#### To run experiment with medium difficulty maze map execute following commands:
+#### 1.1. To run experiment with medium difficulty maze map execute following commands:
+
 ```bash
 
 cd $GOPATH/src/github.com/yaricom/goNEAT_NS
@@ -175,7 +176,8 @@ The top plot shows final destinations of the most fit agents (fitness >= 0.8) an
 for experimental run with winner genome configuration presented above. At that experiment was produced 32 species among which
 the most fit ones has amounted to eight.
 
-#### To run experiment with hard difficulty maze map execute following commands:
+#### 1.2. To run experiment with hard difficulty maze map execute following commands:
+
 ```bash
 
 cd $GOPATH/src/github.com/yaricom/goNEAT_NS
@@ -225,7 +227,8 @@ and maze exit.
 
 The effect of this fitness function is to reward the solving agent for ending in a place as close to the maze exit as possible.
 
-#### To run experiment with medium difficulty maze map execute following commands:
+#### 2.1. To run experiment with medium difficulty maze map execute following commands:
+
 ```bash
 
 cd $GOPATH/src/github.com/yaricom/goNEAT_NS
@@ -273,7 +276,8 @@ The initial agent position is at the top-left corner marked with green circle an
 By comparing it with simulation based on Novelty Search optimization it may be seen that agent's final destinations is less
 evenly distributed through the maze space and some areas left completely unexplored.
 
-#### To run experiment with hard difficulty maze map execute following commands:
+#### 2.2. To run experiment with hard difficulty maze map execute following commands:
+
 ```bash
 
 cd $GOPATH/src/github.com/yaricom/goNEAT_NS
@@ -306,8 +310,8 @@ optima present, such as maze solving. Our experiments based on two maze environm
 
 With medium maze configuration both fitness function optimization methods was able to produce agents able to solve the maze:
 
-* the Novelty Search based agent was able to solve maze in ten from ten trials
-* the Objective-Based agent was able to solve medium maze in nine from ten trials
+* the Novelty Search based agent was able to solve maze in 10 from 10 trials
+* the Objective-Based agent was able to solve medium maze in 9 from 10 trials
 
 The novelty search optimization also resulted in producing more energy efficient and elegant genome for solver agent. The
 absolute winner with NS optimization has only 15 neurons with 19 links between (Fitness: 0.984) compared to objective-based
@@ -381,7 +385,7 @@ Averages for all organisms evaluated during experiment
 ### Hard maze results
 
 With hard maze configuration objective-based optimization method *failed to produce any agent able to solve this maze.*
-At the same time Novelty Search based optimization able to avoid deceptive strong local optima introduced in hard maze
+At the same time Novelty Search based optimization is able to avoid deceptive strong local optima introduced in hard maze
 and produce effective solver agents in less than 300 generations over the same ten trial executions.
 
 ```
