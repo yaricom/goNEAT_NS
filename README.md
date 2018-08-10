@@ -315,6 +315,7 @@ optimization where best agent has 60 neurons with 214 links between (Fitness: 0.
 how close final agent's position to the maze exit after 400 time steps (where 1.0 means exact match). Full statistics of
 experiment provided further.
 
+```
 Medium Maze Objective-Based:
 ============================
 +++ Solved 9 trials from 10 +++
@@ -374,6 +375,8 @@ Averages for all organisms evaluated during experiment
 	Complexity:	43.5
 	Age:		41.1
 	Fitness:	0.5
+```
+
 
 ### Hard maze results
 
@@ -381,6 +384,7 @@ With hard maze configuration objective-based optimization method *failed to prod
 At the same time Novelty Search based optimization able to avoid deceptive strong local optima introduced in hard maze
 and produce effective solver agents in less than 300 generations over the same ten trial executions.
 
+```
 Hard Maze Novelty Search:
 ============================
 +++ Solved 10 trials from 10 +++
@@ -410,6 +414,7 @@ Averages for all organisms evaluated during experiment
 	Complexity:	46.4
 	Age:		42.7
 	Fitness:	0.3
+```
 
 ### Conclusion
 
