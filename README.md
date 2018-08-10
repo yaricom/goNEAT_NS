@@ -349,7 +349,8 @@ Averages for all organisms evaluated during experiment
 	Complexity:	105.5
 	Age:		165.5
 	Fitness:	0.8
-
+```
+```
 Medium Maze Novelty Search:
 ============================
 +++ Solved 10 trials from 10 +++
@@ -479,17 +480,19 @@ Where:
 
 ## Credits
 
-The original C++ NEAT implementation created by Kenneth Stanley, see: [NEAT][1]
+* The original C++ NEAT implementation created by Kenneth Stanley, see: [NEAT][1]
+* Other NEAT implementations may be found at [NEAT Software Catalog][2]
+* [Novelty Search and the Problem with Objectives][4]
+* [EVOLUTION THROUGH THE SEARCH FOR NOVELTY][5]
 
-This source code maintained and managed by Iaroslav Omelianenko
-
-Other NEAT implementations may be found at [NEAT Software Catalog][2]
+This source code maintained and managed by [Iaroslav Omelianenko][6]
 
 [1]:http://www.cs.ucf.edu/~kstanley/neat.html
 [2]:http://eplex.cs.ucf.edu/neat_software/
 [3]:https://github.com/yaricom/goNEAT
 [4]:http://eplex.cs.ucf.edu/papers/lehman_gptp11.pdf
 [5]:http://joellehman.com/lehman-dissertation.pdf
+[6]:https://io42.space
 
 
 [seed_genome_graph]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/seed_genome.png "The seed genome graph"
