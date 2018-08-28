@@ -478,12 +478,14 @@ Where:
 - **height** the plot canvas height
 
 
-## Credits
+## References:
 
-* The original C++ NEAT implementation created by Kenneth Stanley, see: [NEAT][1]
-* Other NEAT implementations may be found at [NEAT Software Catalog][2]
-* [Novelty Search and the Problem with Objectives][4]
-* [EVOLUTION THROUGH THE SEARCH FOR NOVELTY][5]
+1. The original C++ NEAT implementation created by Kenneth O. Stanley, see: [NEAT][1]
+2. Other NEAT implementations can be found at [NEAT Software Catalog][2]
+3. Joel Lehman and Kenneth O. Stanley, [Novelty Search and the Problem with Objectives][4], Genetic Programming: Theory and Practice IX (GPTP 2011), New York, NY: Springer, 2011
+4. Joel Lehman, [Evolution through the search for novelty][5], B.S. Ohio State University, 2007
+5. Iaroslav Omelianenko, [Neuroevolution - evolving Artificial Neural Networks topology from the scratch][7], Medium, 2018
+6. Iaroslav Omelianenko, [The GoLang NEAT implementation][3], GitHub, 2018
 
 This source code maintained and managed by [Iaroslav Omelianenko][6]
 
@@ -493,6 +495,7 @@ This source code maintained and managed by [Iaroslav Omelianenko][6]
 [4]:http://eplex.cs.ucf.edu/papers/lehman_gptp11.pdf
 [5]:http://joellehman.com/lehman-dissertation.pdf
 [6]:https://io42.space
+[7]:https://medium.com/@io42/neuroevolution-evolving-artificial-neural-networks-topology-from-the-scratch-d1ebc5540d84
 
 
 [seed_genome_graph]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/seed_genome.png "The seed genome graph"
