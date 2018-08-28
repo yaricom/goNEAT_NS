@@ -486,8 +486,9 @@ Where:
 2. Other NEAT implementations can be found at [NEAT Software Catalog][2]
 3. Joel Lehman and Kenneth O. Stanley, [Novelty Search and the Problem with Objectives][4], Genetic Programming: Theory and Practice IX (GPTP 2011), New York, NY: Springer, 2011
 4. Joel Lehman, [Evolution through the search for novelty][5], B.S. Ohio State University, 2007
-5. Iaroslav Omelianenko, [Neuroevolution - evolving Artificial Neural Networks topology from the scratch][7], Medium, 2018
-6. Iaroslav Omelianenko, [The GoLang NEAT implementation][3], GitHub, 2018
+5. Iaroslav Omelianenko, [Novelty Search for Autonomous Artificial Intelligent Agents][8], Medium, 2018
+6. Iaroslav Omelianenko, [Neuroevolution - evolving Artificial Neural Networks topology from the scratch][7], Medium, 2018
+7. Iaroslav Omelianenko, [The GoLang NEAT implementation][3], GitHub, 2018
 
 This source code maintained and managed by [Iaroslav Omelianenko][6]
 
@@ -498,6 +499,7 @@ This source code maintained and managed by [Iaroslav Omelianenko][6]
 [5]:http://joellehman.com/lehman-dissertation.pdf
 [6]:https://io42.space
 [7]:https://medium.com/@io42/neuroevolution-evolving-artificial-neural-networks-topology-from-the-scratch-d1ebc5540d84
+[8]:https://medium.com/@io42/novelty-search-for-autonomous-artificial-intelligent-agents-78ca5143c537
 
 
 [maze_agent_scheme]: https://github.com/yaricom/goNEAT_NS/blob/master/contents/maze-agent.png "The maze agent with input sensors"
