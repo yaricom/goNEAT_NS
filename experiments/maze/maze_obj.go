@@ -104,10 +104,6 @@ func (ev MazeObjectiveEvaluator) GenerationEvaluate(pop *genetics.Population, ep
 
 		neat.InfoLog(fmt.Sprintf("%d species -> %d organisms [compatibility threshold: %.1f, target: %d]\n",
 			speciesCount, len(pop.Organisms), context.CompatThreshold, ev.NumSpeciesTarget))
-
-		// Move to the next epoch if failed to find winner
-		neat.DebugLog(">>>>> start next generation")
-		_, err = pop.Epoch(epoch.Id + 1, context)
 	}
 
 	return err
