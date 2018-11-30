@@ -7,6 +7,7 @@ import (
 	"github.com/yaricom/goNEAT/neat/genetics"
 	"github.com/yaricom/goNEAT_NS/neatns"
 	"math"
+	"github.com/yaricom/goNEAT/neat/network"
 )
 
 // The simulation results for one trial
@@ -127,16 +128,16 @@ func mazeSimulationInit(env Environment, org *genetics.Organism) (*Environment, 
 
 	// Relax phenotype net and get output
 	_, err = org.Phenotype.Activate()
-	if err != nil {
-		neat.ErrorLog("Failed to activate network")
+	if err != nil && err != network.NetErrMaxAttempts {
+		neat.ErrorLog("Failed to activate network init 1")
 		return nil, err
 	}
 
 	// use depth to ensure relaxation at each layer
 	for relax := 0; relax <= net_depth; relax++ {
 		_, err = org.Phenotype.Activate()
-		if err != nil {
-			neat.ErrorLog("Failed to activate network")
+		if err != nil && err != network.NetErrMaxAttempts {
+			neat.ErrorLog("Failed to activate network init 2")
 			return nil, err
 		}
 	}
@@ -153,8 +154,8 @@ func mazeSimulationStep(env *Environment, org *genetics.Organism) error {
 	}
 	org.Phenotype.LoadSensors(inputs)
 	_, err = org.Phenotype.Activate()
-	if err != nil {
-		neat.ErrorLog("Failed to activate network")
+	if err != nil && err != network.NetErrMaxAttempts {
+		neat.ErrorLog("Failed to activate network simulation")
 		return err
 	}
 
