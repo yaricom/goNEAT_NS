@@ -1,20 +1,20 @@
 /* The maze agent seed genome */
 genomestart 1
 trait 1 0.1 0 0 0 0 0 0 0
-node 1 0 1 3 1
-node 2 0 1 1 1
-node 3 0 1 1 1
-node 4 0 1 1 1
-node 5 0 1 1 1
-node 6 0 1 1 1
-node 7 0 1 1 1
-node 8 0 1 1 1
-node 9 0 1 1 1
-node 10 0 1 1 1
-node 11 0 1 1 1
-node 12 0 0 0 0
-node 13 0 0 2 0
-node 14 0 0 2 0
+node 1 0 1 3 LinearActivation
+node 2 0 1 1 LinearActivation
+node 3 0 1 1 LinearActivation
+node 4 0 1 1 LinearActivation
+node 5 0 1 1 LinearActivation
+node 6 0 1 1 LinearActivation
+node 7 0 1 1 LinearActivation
+node 8 0 1 1 LinearActivation
+node 9 0 1 1 LinearActivation
+node 10 0 1 1 LinearActivation
+node 11 0 1 1 LinearActivation
+node 12 0 0 0 SigmoidSteepenedActivation
+node 13 0 0 2 LinearActivation
+node 14 0 0 2 LinearActivation
 gene 1 1 12 0.0 0 1 0 1
 gene 1 2 12 0.0 0 2 0 1
 gene 1 3 12 0.0 0 3 0 1
