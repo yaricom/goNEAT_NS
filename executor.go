@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"log"
 	"github.com/yaricom/goNEAT_NS/experiments/maze"
+	"strings"
 )
 
 
@@ -48,7 +49,15 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to open genome file: ", err)
 	}
-	start_genome, err := genetics.ReadGenome(genomeFile, 1)
+	encoding := genetics.PlainGenomeEncoding
+	if strings.HasSuffix(*genome_path, ".yml") {
+		encoding = genetics.YAMLGenomeEncoding
+	}
+	decoder, err := genetics.NewGenomeReader(genomeFile, encoding)
+	if err != nil {
+		log.Fatal("Failed to create genome decoder: ", err)
+	}
+	start_genome, err := decoder.Read()
 	if err != nil {
 		log.Fatal("Failed to read start genome: ", err)
 	}
@@ -95,7 +104,6 @@ func main() {
 	if *log_level >= 0 {
 		neat.LogLevel = neat.LoggerLevel(*log_level)
 	}
-
 
 	experiment := experiments.Experiment{
 		Id:0,
