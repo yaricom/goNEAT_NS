@@ -30,7 +30,12 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	org := genetics.NewOrganism(0.1, gen, 1)
+	org, err := genetics.NewOrganism(0.1, gen, 1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
 	err = archive.UpdateFittestWithOrganism(fillOrganismData(org, 0.0))
 	if err != nil {
 		t.Error(err)
@@ -43,7 +48,12 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 	}
 
 	for i := 2; i <= fittestAllowedSize; i++ {
-		archive.UpdateFittestWithOrganism(fillOrganismData(genetics.NewOrganism(0.1 * float64(i), gen, 1), 0.0))
+		org, err = genetics.NewOrganism(0.1 * float64(i), gen, 1)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		archive.UpdateFittestWithOrganism(fillOrganismData(org, 0.0))
 	}
 
 	for i := 0; i < fittestAllowedSize; i++ {
@@ -54,7 +64,12 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 
 	// test update over allowed size
 	fitness := 0.6
-	archive.UpdateFittestWithOrganism(fillOrganismData(genetics.NewOrganism(fitness, gen, 1), 0.0))
+	org, err = genetics.NewOrganism(fitness, gen, 1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	archive.UpdateFittestWithOrganism(fillOrganismData(org, 0.0))
 	if len(archive.FittestItems) != fittestAllowedSize {
 		t.Error("len(archive.FittestItems) != fittestAllowedSize")
 	}
@@ -69,8 +84,14 @@ func TestNoveltyArchive_addNoveltyItem(t *testing.T) {
 	gen, err := genetics.ReadGenome(strings.NewReader(gnome_str), 1)
 	if err != nil {
 		t.Error(err)
+		return
 	}
-	org := fillOrganismData(genetics.NewOrganism(0.1, gen, 1), 0.0)
+	org, err := genetics.NewOrganism(0.1, gen, 1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	org = fillOrganismData(org, 0.0)
 
 	// test add novelty item
 	item := org.Data.Value.(*NoveltyItem)
@@ -194,7 +215,7 @@ func TestNoveltyArchive_EvaluatePopulation(t *testing.T) {
 	}
 }
 
-func fillOrganismData(org *genetics.Organism, novelty float64) *genetics.Organism{
+func fillOrganismData(org *genetics.Organism, novelty float64) *genetics.Organism {
 	ni := NoveltyItem{
 		Generation:org.Generation,
 		Fitness:org.Fitness,
