@@ -101,6 +101,14 @@ func mazeSimulationInit(env Environment, org *genetics.Organism) (*Environment, 
 
 	// get Organism phenotype's network depth
 	net_depth, err := org.Phenotype.MaxDepth() // The max depth of the network to be activated
+	if err != nil {
+		if err != network.NetErrDepthCalculationFailedLoopDetected {
+			return nil, err
+		} else {
+			neat.InfoLog(fmt.Sprintf("Network loop detected, using default depth: %d for organism: %d\n",
+				net_depth, org.Genotype.Id))
+		}
+	}
 	neat.DebugLog(fmt.Sprintf("Network depth: %d for organism: %d\n", net_depth, org.Genotype.Id))
 	if net_depth == 0 {
 		neat.DebugLog(fmt.Sprintf("ALERT: Network depth is ZERO for Genome: %s", org.Genotype))
@@ -122,21 +130,21 @@ func mazeSimulationInit(env Environment, org *genetics.Organism) (*Environment, 
 	}
 
 	// load into neural net
-	org.Phenotype.LoadSensors(inputs)
+	if err = org.Phenotype.LoadSensors(inputs); err != nil {
+		return nil, err
+	}
 
 	// propagate input through the phenotype net
 
 	// Relax phenotype net and get output
-	_, err = org.Phenotype.Activate()
-	if err != nil && err != network.NetErrMaxAttempts {
+	if _, err = org.Phenotype.Activate();err != nil && err != network.NetErrExceededMaxActivationAttempts {
 		neat.ErrorLog("Failed to activate network init 1")
 		return nil, err
 	}
 
 	// use depth to ensure relaxation at each layer
 	for relax := 0; relax <= net_depth; relax++ {
-		_, err = org.Phenotype.Activate()
-		if err != nil && err != network.NetErrMaxAttempts {
+		if _, err = org.Phenotype.Activate();err != nil && err != network.NetErrExceededMaxActivationAttempts {
 			neat.ErrorLog("Failed to activate network init 2")
 			return nil, err
 		}
@@ -154,7 +162,7 @@ func mazeSimulationStep(env *Environment, org *genetics.Organism) error {
 	}
 	org.Phenotype.LoadSensors(inputs)
 	_, err = org.Phenotype.Activate()
-	if err != nil && err != network.NetErrMaxAttempts {
+	if err != nil && err != network.NetErrExceededMaxActivationAttempts {
 		neat.ErrorLog("Failed to activate network simulation")
 		return err
 	}
