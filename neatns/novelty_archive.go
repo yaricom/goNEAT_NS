@@ -217,15 +217,9 @@ func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neigh int, pop *geneti
 	}
 
 	if length >= archiveSeedAmount {
-		length = neigh
-		if len(novelties) < length {
-			length = len(novelties)
-		}
-		i := 0
-		for weight < float64(neigh) && i < len(novelties) {
+		for i := 0; weight < float64(neigh) && i < len(novelties); i++ {
 			sum += novelties[i].distance
 			weight += 1.0
-			i++
 		}
 
 		// find average
@@ -239,23 +233,23 @@ func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neigh int, pop *geneti
 
 // map the novelty metric across the archive against provided item
 func (a *NoveltyArchive) mapNovelty(item *NoveltyItem) ItemsDistances {
-	novelties := make([]ItemsDistance, len(a.NovelItems))
+	distances := make([]ItemsDistance, len(a.NovelItems))
 	for i := 0; i < len(a.NovelItems); i++ {
-		novelties[i] = ItemsDistance{
+		distances[i] = ItemsDistance{
 			distance:a.noveltyMetric(a.NovelItems[i], item),
 			from:a.NovelItems[i],
 			to:item,
 		}
 	}
-	return ItemsDistances(novelties)
+	return ItemsDistances(distances)
 }
 
 // map the novelty metric across the archive and the current population
 func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics.Population) ItemsDistances {
-	novelties := make([]ItemsDistance, len(a.NovelItems))
+	distances := make([]ItemsDistance, len(a.NovelItems))
 	n_index := 0
 	for i := 0; i < len(a.NovelItems); i++ {
-		novelties[n_index] = ItemsDistance{
+		distances[n_index] = ItemsDistance{
 			distance:a.noveltyMetric(a.NovelItems[i], item),
 			from:a.NovelItems[i],
 			to:item,
@@ -271,8 +265,8 @@ func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics
 				from:org_item,
 				to:item,
 			}
-			novelties = append(novelties, dist)
+			distances = append(distances, dist)
 		}
 	}
-	return ItemsDistances(novelties)
+	return ItemsDistances(distances)
 }
