@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"errors"
+	"math"
 )
 
 // The initial novelty threshold for Novelty Archive
@@ -179,8 +180,13 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 	org.Error = 1 - n_item.Fitness // error value consider how far  we are from exit normalized to (0;1] range
 
 	// calculate novelty of new individual within archive of known novel items
-	trialSim.archive.EvaluateIndividualNovelty(org, pop, false)
-	record.Novelty = org.Data.Value.(*neatns.NoveltyItem).Novelty // put it to the record
+	if !solved {
+		trialSim.archive.EvaluateIndividualNovelty(org, pop, false)
+		record.Novelty = org.Data.Value.(*neatns.NoveltyItem).Novelty // put it to the record
+	} else {
+		// solution found - set to maximal possible value
+		record.Novelty = math.MaxFloat64
+	}
 
 	// add record
 	trialSim.records.Records = append(trialSim.records.Records, record)
