@@ -26,7 +26,7 @@ func main() {
 	var time_steps_sample = flag.Int("timesteps_sample", 1000, "The sample size to store agent path when doing maze simulation.")
 	var species_target = flag.Int("species_target", 20, "The target number of species to maintain.")
 	var species_compat_adjust_freq = flag.Int("species_adjust_freq", 10, "The frequency of species compatibility theshold adjustments when trying to maintain their number.")
-	var trials_count = flag.Int("trials", 0, "The numbar of trials for experiment. Overrides the one set in configuration.")
+	var trials_count = flag.Int("trials", 0, "The number of trials for experiment. Overrides the one set in configuration.")
 	var log_level = flag.Int("log_level", -1, "The logger level to be used. Overrides the one set in configuration.")
 	var exit_range = flag.Float64("exit_range", 5.0, "The range around maze exit point to test if agent coordinates is within to be considered as solved successfully")
 
