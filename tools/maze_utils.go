@@ -193,6 +193,14 @@ func plotSpecies(records *maze.RecordStore, dc *gg.Context, speciesId int, color
 	}
 }
 
+func plotSolverPath(records *maze.RecordStore, dc *gg.Context, color color.Color) {
+	for _,p := range records.SolverPathPoints {
+		dc.DrawCircle(p.X, p.Y, 2.0)
+		dc.SetColor(color)
+		dc.Fill()
+	}
+}
+
 func drawMazeWithRecords(rec io.Reader, mr io.Reader, best_threshold float64, dc *gg.Context) error {
 	env, err := maze.ReadEnvironment(mr)
 	if err != nil {
@@ -209,6 +217,28 @@ func drawMazeWithRecords(rec io.Reader, mr io.Reader, best_threshold float64, dc
 	return nil
 }
 
+func drawMazeWithPath(rec io.Reader, mr io.Reader, dc *gg.Context) error {
+	env, err := maze.ReadEnvironment(mr)
+	if err != nil {
+		return err
+	}
+	rs := maze.RecordStore{}
+	err = rs.Read(rec)
+	if err != nil {
+		return err
+	}
+
+	// draw the agents path
+	plotSolverPath(&rs, dc, color.RGBA{0, 0, 251, 255})
+
+	// draw maze
+	drawMaze(env, dc)
+
+	fmt.Printf("Path rendered for %d points", len(rs.SolverPathPoints))
+
+	return nil
+}
+
 func main() {
 	var out_file_path = flag.String("out", "./out/out.png", "The PNG file to save visualization results.")
 	var width = flag.Int("width", 400, "The canvas width for visualization")
@@ -216,12 +246,12 @@ func main() {
 	var rec_path = flag.String("records", "", "The path to the file with agents recorded data")
 	var maze_path = flag.String("maze", "", "The path to the maze environment config file")
 	var best_threshold = flag.Float64("b_thresh", 0.8, "The minimal fitness of maze solving agent's species to be considered as the best ones.")
+	var operation = flag.String("operation", "draw_agents", "The name of operation to apply to the records [draw_agents, draw_path].")
 
 	flag.Parse()
 
 	rand.Seed(int64(1042))
 
-	dc := gg.NewContext(*width, *height)
 
 	log.Printf("Loading records from: %s\n", *rec_path)
 
@@ -241,15 +271,23 @@ func main() {
 		log.Fatalf("Failed to open maze config file: %s\n", *maze_path)
 	}
 
+	dc := gg.NewContext(*width, *height)
+
 	// set background
 	dc.SetColor(color.White)
 	dc.DrawRectangle(0, 0, float64(*width), float64(*height))
 	dc.Fill()
 
-	err = drawMazeWithRecords(rec_file, maze_file, *best_threshold, dc)
-	if err != nil {
-		log.Fatalf("Failed to render maze with agents, reason: %s\n", err)
+	if *operation == "draw_agents" {
+		err = drawMazeWithRecords(rec_file, maze_file, *best_threshold, dc)
+	} else if *operation == "draw_path" {
+		err = drawMazeWithPath(rec_file, maze_file, dc)
 	}
+
+	if err != nil {
+		log.Fatalf("Failed to render agents records, reason: %s\n", err)
+	}
+
 
 	// Check if output dir exists
 	out_dir_path, _ := path.Split(*out_file_path)
