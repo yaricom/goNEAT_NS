@@ -13,6 +13,11 @@ func TestRecordStore_Write_Read(t *testing.T) {
 		{2, 11, 21, 41, false, 1, 0, 1, 1},
 		{3, 12, 22, 42, true, 1, 0, 1, 1},
 	}
+	rs.SolverPathPoints = [] Point {
+		{0, 1},
+		{2, 3},
+		{4, 5},
+	}
 
 	// the store medium
 	var store bytes.Buffer
@@ -41,6 +46,17 @@ func TestRecordStore_Write_Read(t *testing.T) {
 		}
 		if rs.Records[i].GotExit != nrs.Records[i].GotExit {
 			t.Error("rs.Records[i].GotExit != nrs.Records[i].GotExit")
+		}
+	}
+
+	for i := 0; i < len(rs.SolverPathPoints); i++ {
+		if rs.SolverPathPoints[i].X != nrs.SolverPathPoints[i].X {
+			t.Error("rs.SolverPathPoints[i].X != nrs.SolverPathPoints[i].X",
+				rs.SolverPathPoints[i].X, nrs.SolverPathPoints[i].X)
+		}
+		if rs.SolverPathPoints[i].Y != nrs.SolverPathPoints[i].Y {
+			t.Error("rs.SolverPathPoints[i].Y != nrs.SolverPathPoints[i].Y",
+				rs.SolverPathPoints[i].Y, nrs.SolverPathPoints[i].Y)
 		}
 	}
 }
