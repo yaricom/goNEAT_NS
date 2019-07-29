@@ -40,7 +40,7 @@ func histDiff(in1, in2 []float64) float64 {
 
 // To evaluate an individual organism within provided maze environment and to create corresponding novelty point.
 // If maze was solved during simulation the second returned parameter will be true.
-func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *AgentRecord) (*neatns.NoveltyItem, bool, error) {
+func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *AgentRecord, pathPoints []Point) (*neatns.NoveltyItem, bool, error) {
 	n_item := neatns.NewNoveltyItem()
 
 	// initialize maze simulation's environment specific to the provided organism - this will be a copy
@@ -61,6 +61,11 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 		if (org_env.TimeSteps - i) % org_env.SampleSize == 0 {
 			n_item.Data = append(n_item.Data, org_env.Hero.Location.X)
 			n_item.Data = append(n_item.Data, org_env.Hero.Location.Y)
+		}
+
+		// store all path points if requested
+		if pathPoints != nil {
+			pathPoints[i] = org_env.Hero.Location
 		}
 		steps++
 	}

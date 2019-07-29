@@ -139,7 +139,7 @@ func (ev *MazeObjectiveEvaluator) orgEvaluate(org *genetics.Organism, pop *genet
 	record.SpeciesAge = org.Species.Age
 
 	// evaluate individual organism and get novelty point holding simulation results
-	n_item, solved, err := mazeSimulationEvaluate(ev.Environment, org, &record)
+	n_item, solved, err := mazeSimulationEvaluate(ev.Environment, org, &record, nil)
 	if err != nil {
 		return false, err
 	}
@@ -148,6 +148,16 @@ func (ev *MazeObjectiveEvaluator) orgEvaluate(org *genetics.Organism, pop *genet
 	org.Fitness = n_item.Fitness
 	org.IsWinner = solved // store if maze was solved
 	org.Error = 1 - n_item.Fitness // error value consider how far  we are from exit normalized to (0;1] range
+
+	if solved {
+		// run simulation to store solver path
+		pathPoints := make([]Point, ev.Environment.TimeSteps)
+		_, _, err := mazeSimulationEvaluate(ev.Environment, org, &record, pathPoints)
+		if err != nil {
+			neat.ErrorLog("Solver's path simulation failed\n")
+			return false, err
+		}
+	}
 
 	// add record
 	trialSim.records.Records = append(trialSim.records.Records, record)

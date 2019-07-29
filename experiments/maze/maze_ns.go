@@ -170,7 +170,7 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 	record.SpeciesAge = org.Species.Age
 
 	// evaluate individual organism and get novelty point
-	n_item, solved, err := mazeSimulationEvaluate(ev.Environment, org, &record)
+	n_item, solved, err := mazeSimulationEvaluate(ev.Environment, org, &record, nil)
 	if err != nil {
 		return false, err
 	}
@@ -186,6 +186,14 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 	} else {
 		// solution found - set to maximal possible value
 		record.Novelty = math.MaxFloat64
+
+		// run simulation to store solver path
+		pathPoints := make([]Point, ev.Environment.TimeSteps)
+		_, _, err := mazeSimulationEvaluate(ev.Environment, org, &record, pathPoints)
+		if err != nil {
+			neat.ErrorLog("Solver's path simulation failed\n")
+			return false, err
+		}
 	}
 
 	// add record
