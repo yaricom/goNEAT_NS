@@ -23,12 +23,18 @@ func TestRecordStore_Write_Read(t *testing.T) {
 	var store bytes.Buffer
 
 	// store records
-	rs.Write(&store)
+	err := rs.Write(&store)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// read records to the new store
 	nrs := new(RecordStore)
 
-	nrs.Read(&store)
+	err = nrs.Read(&store)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// check results
 	for i := 0; i < len(rs.Records); i++ {
