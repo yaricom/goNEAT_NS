@@ -371,7 +371,7 @@ func (e *Environment) Update() error {
 	e.updateRadar()
 
 	// Test if update agent's position solved the maze
-	e.testExitFoundByAgent()
+	e.ExitFound = e.testExitFoundByAgent()
 
 	return nil
 }
@@ -383,11 +383,7 @@ func (e *Environment) testExitFoundByAgent() bool {
 	}
 
 	dist := e.AgentDistanceToExit()
-	if dist < e.ExitFoundRange {
-		e.ExitFound = true
-	}
-
-	return e.ExitFound
+	return dist < e.ExitFoundRange
 }
 
 // used for fitness calculations based on distance of maze Agent to the target maze exit
