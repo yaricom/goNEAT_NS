@@ -189,11 +189,12 @@ func (ev *MazeNoveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *g
 
 		// run simulation to store solver path
 		pathPoints := make([]Point, ev.Environment.TimeSteps)
-		_, _, err := mazeSimulationEvaluate(ev.Environment, org, &record, pathPoints)
+		_, _, err := mazeSimulationEvaluate(ev.Environment, org, nil, pathPoints)
 		if err != nil {
 			neat.ErrorLog("Solver's path simulation failed\n")
 			return false, err
 		}
+		trialSim.records.SolverPathPoints = pathPoints
 	}
 
 	// add record

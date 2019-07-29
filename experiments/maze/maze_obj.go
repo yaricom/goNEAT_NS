@@ -157,6 +157,7 @@ func (ev *MazeObjectiveEvaluator) orgEvaluate(org *genetics.Organism, pop *genet
 			neat.ErrorLog("Solver's path simulation failed\n")
 			return false, err
 		}
+		trialSim.records.SolverPathPoints = pathPoints
 	}
 
 	// add record
