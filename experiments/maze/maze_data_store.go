@@ -4,7 +4,6 @@ import (
 	"io"
 	"encoding/gob"
 	"errors"
-	"fmt"
 )
 
 // The record holding info about individual maze agent performance at the end of simulation
@@ -41,54 +40,14 @@ func (r *RecordStore) Write(w io.Writer) error {
 	if len(r.Records) == 0 {
 		return errors.New("No records to store")
 	}
-	// write the number of records and solver's path points
-	fmt.Fprintf(w, "%d %d", len(r.Records), len(r.SolverPathPoints))
-	// write records
 	enc := gob.NewEncoder(w)
-	for i := 0; i < len(r.Records); i++ {
-		err := enc.Encode(r.Records[i])
-		if err != nil {
-			return err
-		}
-	}
-	// write solver's path points
-	for _, p := range r.SolverPathPoints {
-		err := enc.Encode(p)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	err := enc.Encode(r)
+	return err
 }
 
 // Reads record store data from provided reader
 func (rs *RecordStore) Read(r io.Reader) error {
-	// read the number of records and solver path points
-	var recNum, pathNum int
-	fmt.Fscanf(r, "%d %d", &recNum, &pathNum)
-	// read agents records
-	rs.Records = make([]AgentRecord, recNum)
 	dec := gob.NewDecoder(r)
-	for i := 0; i < recNum; i++ {
-		var ar AgentRecord
-		err := dec.Decode(&ar)
-		if err != nil {
-			return err
-		}
-		rs.Records[i] = ar
-	}
-	// read solver path points
-	if pathNum == 0 {
-		return nil
-	}
-	rs.SolverPathPoints = make([]Point, pathNum)
-	for i := 0; i < pathNum; i++ {
-		var p Point
-		err := dec.Decode(&p)
-		if err != nil {
-			return err
-		}
-		rs.SolverPathPoints[i] = p
-	}
-	return nil
+	err := dec.Decode(&rs)
+	return err
 }
