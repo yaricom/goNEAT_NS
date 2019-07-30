@@ -194,7 +194,7 @@ func plotSpecies(records *maze.RecordStore, dc *gg.Context, speciesId int, color
 }
 
 func plotSolverPath(records *maze.RecordStore, dc *gg.Context, color color.Color) {
-	for _,p := range records.SolverPathPoints {
+	for _, p := range records.SolverPathPoints {
 		dc.DrawCircle(p.X, p.Y, 2.0)
 		dc.SetColor(color)
 		dc.Fill()
@@ -252,7 +252,6 @@ func main() {
 
 	rand.Seed(int64(1042))
 
-
 	log.Printf("Loading records from: %s\n", *rec_path)
 
 	if len(*rec_path) == 0 {
@@ -278,10 +277,16 @@ func main() {
 	dc.DrawRectangle(0, 0, float64(*width), float64(*height))
 	dc.Fill()
 
-	if *operation == "draw_agents" {
+	switch *operation {
+	case "draw_agents":
 		err = drawMazeWithRecords(rec_file, maze_file, *best_threshold, dc)
-	} else if *operation == "draw_path" {
+		break
+	case "draw_path":
 		err = drawMazeWithPath(rec_file, maze_file, dc)
+		break
+	default:
+		log.Fatalf("Usupported drawing operation requested: %s", *operation)
+
 	}
 
 	if err != nil {
