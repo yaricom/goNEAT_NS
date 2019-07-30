@@ -183,7 +183,7 @@ The path of the winner that was able to solve the medium maze is shown in the fo
 ![alt text][mazens_medium_winner_path]
 
 As you can see from the plot above the evolution guided by Novelty Search was able to find the effective
-maze solver agent. The trajectory of solver agent is close to optimal taking into account motion
+maze solver agent. The trajectory of the solver agent is close to optimal taking into account motion
 dynamics of the simulated robot.
 
 
@@ -231,8 +231,7 @@ The path of successful solver agent is shown on the plot below.
 
 ![alt text][mazens_hard_winner_path]
 
-With hard maze configuration the evolutionary process guided by the Novelty Search also was able to find the near-optimal
-path through the maze.
+With hard maze configuration, the evolutionary process guided by the Novelty Search also was able to find the near-optimal path through the maze.
 
 
 ### 2. The Maze Navigation with Objective-Based Fitness Optimization
@@ -298,8 +297,8 @@ The plot with path of the successful solver agent through the maze is shown on t
 
 ![alt text][mazeobj_medium_winner_path]
 
-As you can see from the plot above the goal-oriented objective search was able to find less optimal path 
-through the maze (compare it with the NS based search above).
+As you can see from the plot above the goal-oriented objective search was able to find the less optimal path through the 
+maze (compare it with the NS based search above).
 
 #### 2.2. To run experiment with hard difficulty maze map execute following commands:
 
