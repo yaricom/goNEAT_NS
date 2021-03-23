@@ -1,11 +1,11 @@
 package maze
 
 import (
-	"math"
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
-	"bufio"
+	"math"
 	"strings"
 )
 
@@ -18,11 +18,12 @@ type Point struct {
 }
 
 // Reads Point from specified reader
-func ReadPoint(lr io.Reader) Point {
-	point := Point{}
-	fmt.Fscanf(lr, "%f %f", &point.X, &point.Y)
-
-	return point
+func ReadPoint(lr io.Reader) (*Point, error) {
+	point := &Point{}
+	if _, err := fmt.Fscanf(lr, "%f %f", &point.X, &point.Y); err != nil {
+		return nil, err
+	}
+	return point, nil
 }
 
 // To determine angle in degrees of vector defined by (0,0)->This Point. The angle is from 0 to 360 degrees anti clockwise.
@@ -42,8 +43,8 @@ func (p *Point) Rotate(angle float64, point Point) {
 	p.Y -= point.Y
 
 	ox, oy := p.X, p.Y
-	p.X = math.Cos(rad) * ox - math.Sin(rad) * oy
-	p.Y = math.Sin(rad) * ox + math.Cos(rad) * oy
+	p.X = math.Cos(rad)*ox - math.Sin(rad)*oy
+	p.Y = math.Sin(rad)*ox + math.Cos(rad)*oy
 
 	p.X += point.X
 	p.Y += point.Y
@@ -53,7 +54,7 @@ func (p *Point) Rotate(angle float64, point Point) {
 func (p Point) Distance(point Point) float64 {
 	dx := point.X - p.X
 	dy := point.Y - p.Y
-	return math.Sqrt(dx * dx + dy * dy)
+	return math.Sqrt(dx*dx + dy*dy)
 }
 
 // The simple line segment class, used for maze walls
@@ -63,7 +64,7 @@ type Line struct {
 
 // To create new line
 func NewLine(a, b Point) Line {
-	return Line{A:a, B:b}
+	return Line{A: a, B: b}
 }
 
 // Reads line from specified reader
@@ -92,11 +93,11 @@ func (l Line) Intersection(line Line) (bool, Point) {
 	pt := Point{}
 	A, B, C, D := l.A, l.B, line.A, line.B
 
-	rTop := (A.Y - C.Y) * (D.X - C.X) - (A.X - C.X) * (D.Y - C.Y)
-	rBot := (B.X - A.X) * (D.Y - C.Y) - (B.Y - A.Y) * (D.X - C.X)
+	rTop := (A.Y-C.Y)*(D.X-C.X) - (A.X-C.X)*(D.Y-C.Y)
+	rBot := (B.X-A.X)*(D.Y-C.Y) - (B.Y-A.Y)*(D.X-C.X)
 
-	sTop := (A.Y - C.Y) * (B.X - A.X) - (A.X - C.X) * (B.Y - A.Y)
-	sBot := (B.X - A.X) * (D.Y - C.Y) - (B.Y - A.Y) * (D.X - C.X)
+	sTop := (A.Y-C.Y)*(B.X-A.X) - (A.X-C.X)*(B.Y-A.Y)
+	sBot := (B.X-A.X)*(D.Y-C.Y) - (B.Y-A.Y)*(D.X-C.X)
 
 	if rBot == 0 || sBot == 0 {
 		// lines are parallel
@@ -106,8 +107,8 @@ func (l Line) Intersection(line Line) (bool, Point) {
 	r := rTop / rBot
 	s := sTop / sBot
 	if r > 0 && r < 1 && s > 0 && s < 1 {
-		pt.X = A.X + r * (B.X - A.X)
-		pt.Y = A.Y + r * (B.Y - A.Y)
+		pt.X = A.X + r*(B.X-A.X)
+		pt.Y = A.Y + r*(B.Y-A.Y)
 
 		return true, pt
 	}
@@ -116,7 +117,7 @@ func (l Line) Intersection(line Line) (bool, Point) {
 
 // To find distance between line segment and the point
 func (l Line) Distance(p Point) float64 {
-	utop := (p.X - l.A.X) * (l.B.X - l.A.X) + (p.Y - l.A.Y) * (l.B.Y - l.A.Y)
+	utop := (p.X-l.A.X)*(l.B.X-l.A.X) + (p.Y-l.A.Y)*(l.B.Y-l.A.Y)
 	ubot := l.A.Distance(l.B)
 	ubot *= ubot
 	if ubot == 0.0 {
@@ -133,8 +134,8 @@ func (l Line) Distance(p Point) float64 {
 		return d2
 	}
 	point := Point{}
-	point.X = l.A.X + u * (l.B.X - l.A.X)
-	point.Y = l.A.Y + u * (l.B.Y - l.A.Y)
+	point.X = l.A.X + u*(l.B.X-l.A.X)
+	point.Y = l.A.Y + u*(l.B.Y-l.A.Y)
 	return point.Distance(p)
 }
 
@@ -146,39 +147,39 @@ func (l Line) Length() float64 {
 // The class for the maze navigator agent
 type Agent struct {
 	// The current location
-	Location          Point
+	Location Point
 	// The heading direction in degrees
-	Heading           float64
+	Heading float64
 	// The speed of agent
-	Speed             float64
+	Speed float64
 	// The angular velocity
-	AngularVelocity   float64
+	AngularVelocity float64
 	// The radius of agent body
-	Radius            float64
+	Radius float64
 	// The maximal range of range finder sensors
-	RangeFinderRange  float64
+	RangeFinderRange float64
 
 	// The angles of range finder sensors
 	RangeFinderAngles []float64
 	// The beginning angles for radar sensors
-	RadarAngles1      []float64
+	RadarAngles1 []float64
 	// The ending angles for radar sensors
-	RadarAngles2      []float64
+	RadarAngles2 []float64
 
 	// stores radar outputs
-	Radar             []float64
+	Radar []float64
 	// stores rangefinder outputs
-	RangeFinders      []float64
+	RangeFinders []float64
 }
 
 // Creates new Agent with default settings
 func NewAgent() Agent {
 	agent := Agent{
-		Heading:0.0,
-		Speed:0.0,
-		AngularVelocity:0.0,
-		Radius:8.0,
-		RangeFinderRange:100.0,
+		Heading:          0.0,
+		Speed:            0.0,
+		AngularVelocity:  0.0,
+		Radius:           8.0,
+		RangeFinderRange: 100.0,
 	}
 
 	// define the range finder sensors
@@ -197,22 +198,22 @@ func NewAgent() Agent {
 // The maze environment class
 type Environment struct {
 	// The maze navigating agent
-	Hero            Agent
+	Hero Agent
 	// The maze line segments
-	Lines           []Line
+	Lines []Line
 	// The maze exit - goal
-	MazeExit        Point
+	MazeExit Point
 
 	// The flag to indicate if exit was found
-	ExitFound       bool
+	ExitFound bool
 
 	// The number of time steps to be executed during maze solving simulation
-	TimeSteps       int
+	TimeSteps int
 	// The sample step size to determine when to collect subsequent samples during simulation
-	SampleSize      int
+	SampleSize int
 
 	// The range around maze exit point to test if agent coordinates is within to be considered as solved successfully (5.0 is good enough)
-	ExitFoundRange  float64
+	ExitFoundRange float64
 
 	// The initial distance of agent from exit
 	initialDistance float64
@@ -232,17 +233,29 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 		line := scanner.Text()
 		lr := strings.NewReader(line)
 		switch index {
-		case 0:// read in how many line segments
-			fmt.Fscanf(lr, "%d", &numLines)
+		case 0: // read in how many line segments
+			if _, err := fmt.Fscanf(lr, "%d", &numLines); err != nil {
+				return nil, err
+			}
 
-		case 1:// read initial agent's location
-			env.Hero.Location = ReadPoint(lr)
+		case 1: // read initial agent's location
+			if loc, err := ReadPoint(lr); err != nil {
+				return nil, err
+			} else {
+				env.Hero.Location = *loc
+			}
 
-		case 2:// read initial heading
-			fmt.Fscanf(lr, "%f", &env.Hero.Heading)
+		case 2: // read initial heading
+			if _, err := fmt.Fscanf(lr, "%f", &env.Hero.Heading); err != nil {
+				return nil, err
+			}
 
-		case 3:// read the maze exit location
-			env.MazeExit = ReadPoint(lr)
+		case 3: // read the maze exit location
+			if loc, err := ReadPoint(lr); err != nil {
+				return nil, err
+			} else {
+				env.MazeExit = *loc
+			}
 
 		default:
 			// read maze line segments
@@ -274,24 +287,24 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 
 // create neural net inputs from maze agent sensors
 func (e *Environment) GetInputs() ([]float64, error) {
-	inputs_size := len(e.Hero.RangeFinders) + len(e.Hero.Radar) + 1
-	inputs := make([]float64, inputs_size)
+	inputsSize := len(e.Hero.RangeFinders) + len(e.Hero.Radar) + 1
+	inputs := make([]float64, inputsSize)
 	// bias
 	inputs[0] = 1.0
 
 	// range finders
 	i := 0
 	for ; i < len(e.Hero.RangeFinders); i++ {
-		inputs[1 + i] = e.Hero.RangeFinders[i] / e.Hero.RangeFinderRange
-		if math.IsNaN(inputs[1 + i]) {
+		inputs[1+i] = e.Hero.RangeFinders[i] / e.Hero.RangeFinderRange
+		if math.IsNaN(inputs[1+i]) {
 			return nil, errors.New("NAN in inputs from range finders")
 		}
 	}
 
 	// radar
 	for j := 0; j < len(e.Hero.Radar); j++ {
-		inputs[i + j] = e.Hero.Radar[j]
-		if math.IsNaN(inputs[i + j]) {
+		inputs[i+j] = e.Hero.Radar[j]
+		if math.IsNaN(inputs[i+j]) {
 			return nil, errors.New("NAN in inputs from radar")
 		}
 	}
@@ -305,8 +318,8 @@ func (e *Environment) ApplyOutputs(o1, o2 float64) error {
 		return errors.New("OUTPUT is NAN")
 	}
 
-	e.Hero.AngularVelocity += (o1 - 0.5)
-	e.Hero.Speed += (o2 - 0.5)
+	e.Hero.AngularVelocity += o1 - 0.5
+	e.Hero.Speed += o2 - 0.5
 
 	// constraints of speed & angular velocity
 	if e.Hero.Speed > maxAgentSpeed {
@@ -332,8 +345,8 @@ func (e *Environment) Update() error {
 	}
 
 	// get horizontal and vertical velocity components
-	vx := math.Cos(e.Hero.Heading / 180.0 * math.Pi) * e.Hero.Speed
-	vy := math.Sin(e.Hero.Heading / 180.0 * math.Pi) * e.Hero.Speed
+	vx := math.Cos(e.Hero.Heading/180.0*math.Pi) * e.Hero.Speed
+	vy := math.Sin(e.Hero.Heading/180.0*math.Pi) * e.Hero.Speed
 
 	if math.IsNaN(vx) {
 		return errors.New("VX NAN")
@@ -357,8 +370,8 @@ func (e *Environment) Update() error {
 
 	// Find next agent's location
 	newloc := Point{
-		X:vx + e.Hero.Location.X,
-		Y:vy + e.Hero.Location.Y,
+		X: vx + e.Hero.Location.X,
+		Y: vy + e.Hero.Location.Y,
 	}
 	if !e.testAgentCollision(newloc) {
 		e.Hero.Location.X = newloc.X
@@ -399,40 +412,40 @@ func (e *Environment) updateRangefinders() error {
 		rad := e.Hero.RangeFinderAngles[i] / 180.0 * math.Pi
 
 		// project a point from the hero's location outwards
-		projection_point := Point{
-			X:e.Hero.Location.X + math.Cos(rad) * e.Hero.RangeFinderRange,
-			Y:e.Hero.Location.Y + math.Sin(rad) * e.Hero.RangeFinderRange,
+		projectionPoint := Point{
+			X: e.Hero.Location.X + math.Cos(rad)*e.Hero.RangeFinderRange,
+			Y: e.Hero.Location.Y + math.Sin(rad)*e.Hero.RangeFinderRange,
 		}
 		// rotate the projection point by the hero's heading
-		projection_point.Rotate(e.Hero.Heading, e.Hero.Location)
+		projectionPoint.Rotate(e.Hero.Heading, e.Hero.Location)
 
 		// create a line segment from the hero's location to projected
-		projection_line := Line{
-			A:e.Hero.Location,
-			B:projection_point,
+		projectionLine := Line{
+			A: e.Hero.Location,
+			B: projectionPoint,
 		}
 
 		// set range to max by default
-		min_range := e.Hero.RangeFinderRange
+		minRange := e.Hero.RangeFinderRange
 
 		// now test against the environment to see if we hit anything
 		for j := 0; j < len(e.Lines); j++ {
-			found, intersection := e.Lines[j].Intersection(projection_line)
+			found, intersection := e.Lines[j].Intersection(projectionLine)
 			if found {
 				// if so, then update the range to the distance
-				found_range := intersection.Distance(e.Hero.Location)
+				foundRange := intersection.Distance(e.Hero.Location)
 
 				// we want the closest intersection
-				if found_range < min_range {
-					min_range = found_range
+				if foundRange < minRange {
+					minRange = foundRange
 				}
 			}
 		}
 
-		if math.IsNaN(min_range) {
+		if math.IsNaN(minRange) {
 			return errors.New("RANGE is NAN")
 		}
-		e.Hero.RangeFinders[i] = min_range
+		e.Hero.RangeFinders[i] = minRange
 	}
 	return nil
 }
@@ -457,7 +470,7 @@ func (e *Environment) updateRadar() {
 		e.Hero.Radar[i] = 0.0
 
 		if (angle >= e.Hero.RadarAngles1[i] && angle < e.Hero.RadarAngles2[i]) ||
-			(angle + 360.0 >= e.Hero.RadarAngles1[i] && angle + 360.0 < e.Hero.RadarAngles2[i]) {
+			(angle+360.0 >= e.Hero.RadarAngles1[i] && angle+360.0 < e.Hero.RadarAngles2[i]) {
 			e.Hero.Radar[i] = 1.0
 		}
 	}

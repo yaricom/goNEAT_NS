@@ -90,7 +90,8 @@ func TestReadPoint(t *testing.T) {
 	str := "10 20"
 	lr := strings.NewReader(str)
 
-	point := ReadPoint(lr)
+	point, err := ReadPoint(lr)
+	require.NoError(t, err, "failed to read point")
 	assert.Equal(t, 10.0, point.X, "Point has wrong X")
 	assert.Equal(t, 20.0, point.Y, "Point has wrong Y")
 }

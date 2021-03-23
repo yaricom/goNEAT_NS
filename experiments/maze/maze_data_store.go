@@ -38,7 +38,7 @@ type RecordStore struct {
 // Writes record store to the provided writer
 func (s *RecordStore) Write(w io.Writer) error {
 	if len(s.Records) == 0 {
-		return errors.New("No records to store")
+		return errors.New("no records to store")
 	}
 	enc := gob.NewEncoder(w)
 	err := enc.Encode(s)
