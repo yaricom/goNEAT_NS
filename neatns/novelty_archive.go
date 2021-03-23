@@ -1,12 +1,12 @@
 package neatns
 
 import (
-	"github.com/yaricom/goNEAT/neat/genetics"
-	"sort"
 	"errors"
-	"io"
 	"fmt"
 	"github.com/yaricom/goNEAT/neat"
+	"github.com/yaricom/goNEAT/neat/genetics"
+	"io"
+	"sort"
 )
 
 // The maximal allowed size for fittest items list
@@ -19,44 +19,43 @@ const archiveSeedAmount = 1
 // currently in the novelty set
 type NoveltyArchive struct {
 	// the all the novel items we have found so far
-	NovelItems             []*NoveltyItem
+	NovelItems []*NoveltyItem
 	// the all novel items with fittest organisms associated found so far
-	FittestItems           NoveltyItemsByFitness
+	FittestItems NoveltyItemsByFitness
 
 	// the current generation
-	Generation             int
+	Generation int
 
 	// the measure of novelty
-	noveltyMetric          NoveltyMetric
+	noveltyMetric NoveltyMetric
 
 	// the novel items added during current generation
 	itemsAddedInGeneration int
 	// the current generation index
-	generationIndex        int
+	generationIndex int
 
 	// the minimum threshold for a "novel item"
-	noveltyThreshold       float64
+	noveltyThreshold float64
 	// the minimal possible value of novelty threshold
-	noveltyFloor           float64
+	noveltyFloor float64
 
 	// the counter to keep track of how many gens since we've added to the archive
-	timeOut                int
+	timeOut int
 
 	// the parameter for how many neighbors to look at for N-nearest neighbor distance novelty
-	neighbors              int
+	neighbors int
 }
 
 // Creates new instance of novelty archive
 func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive {
 	arch := NoveltyArchive{
-		NovelItems:make([]*NoveltyItem, 0),
-		FittestItems:make([]*NoveltyItem, 0),
-		noveltyMetric:metric,
-		neighbors:KNNNoveltyScore,
-		noveltyFloor:0.25,
-		noveltyThreshold:threshold,
-		generationIndex:archiveSeedAmount,
-
+		NovelItems:       make([]*NoveltyItem, 0),
+		FittestItems:     make([]*NoveltyItem, 0),
+		noveltyMetric:    metric,
+		neighbors:        KNNNoveltyScore,
+		noveltyFloor:     0.25,
+		noveltyThreshold: threshold,
+		generationIndex:  archiveSeedAmount,
 	}
 	return &arch
 }
@@ -102,7 +101,7 @@ func (a *NoveltyArchive) EvaluatePopulationNovelty(pop *genetics.Population, onl
 // to maintain list of fittest organisms so far
 func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error {
 	if org.Data == nil {
-		return errors.New("Organism with no Data provided")
+		return errors.New("organism with no Data provided")
 	}
 
 	if len(a.FittestItems) < fittestAllowedSize {
@@ -113,11 +112,11 @@ func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error
 		// sort to have most fit first
 		sort.Sort(sort.Reverse(a.FittestItems))
 	} else {
-		last_item := a.FittestItems[len(a.FittestItems) - 1]
-		org_item := org.Data.Value.(*NoveltyItem)
-		if org_item.Fitness > last_item.Fitness {
+		lastItem := a.FittestItems[len(a.FittestItems)-1]
+		orgItem := org.Data.Value.(*NoveltyItem)
+		if orgItem.Fitness > lastItem.Fitness {
 			// store organism's novelty item into fittest
-			a.FittestItems = append(a.FittestItems, org_item)
+			a.FittestItems = append(a.FittestItems, orgItem)
 
 			// sort to have most fit first
 			sort.Sort(sort.Reverse(a.FittestItems))
@@ -141,11 +140,13 @@ func (a *NoveltyArchive) EndOfGeneration() {
 // prints collected novelty points to provided writer
 func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
 	if len(a.NovelItems) == 0 {
-		return errors.New("No novel items to print!!!")
+		return errors.New("no novel items to print")
 	}
 	for _, p := range a.NovelItems {
 		str := p.String()
-		fmt.Fprintln(w, str)
+		if _, err := fmt.Fprintln(w, str); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -153,11 +154,13 @@ func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
 // prints collected individuals with maximal fitness
 func (a *NoveltyArchive) PrintFittest(w io.Writer) error {
 	if len(a.FittestItems) == 0 {
-		return errors.New("No fittest items to print!!!")
+		return errors.New("no fittest items to print")
 	}
 	for _, f := range a.FittestItems {
 		str := f.String()
-		fmt.Fprintln(w, str)
+		if _, err := fmt.Fprintln(w, str); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -236,37 +239,37 @@ func (a *NoveltyArchive) mapNovelty(item *NoveltyItem) ItemsDistances {
 	distances := make([]ItemsDistance, len(a.NovelItems))
 	for i := 0; i < len(a.NovelItems); i++ {
 		distances[i] = ItemsDistance{
-			distance:a.noveltyMetric(a.NovelItems[i], item),
-			from:a.NovelItems[i],
-			to:item,
+			distance: a.noveltyMetric(a.NovelItems[i], item),
+			from:     a.NovelItems[i],
+			to:       item,
 		}
 	}
-	return ItemsDistances(distances)
+	return distances
 }
 
 // map the novelty metric across the archive and the current population
 func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics.Population) ItemsDistances {
 	distances := make([]ItemsDistance, len(a.NovelItems))
-	n_index := 0
+	nIndex := 0
 	for i := 0; i < len(a.NovelItems); i++ {
-		distances[n_index] = ItemsDistance{
-			distance:a.noveltyMetric(a.NovelItems[i], item),
-			from:a.NovelItems[i],
-			to:item,
+		distances[nIndex] = ItemsDistance{
+			distance: a.noveltyMetric(a.NovelItems[i], item),
+			from:     a.NovelItems[i],
+			to:       item,
 		}
-		n_index++
+		nIndex++
 	}
 
 	for i := 0; i < len(pop.Organisms); i++ {
 		if pop.Organisms[i].Data != nil {
-			org_item := pop.Organisms[i].Data.Value.(*NoveltyItem)
+			orgItem := pop.Organisms[i].Data.Value.(*NoveltyItem)
 			dist := ItemsDistance{
-				distance:a.noveltyMetric(org_item, item),
-				from:org_item,
-				to:item,
+				distance: a.noveltyMetric(orgItem, item),
+				from:     orgItem,
+				to:       item,
 			}
 			distances = append(distances, dist)
 		}
 	}
-	return ItemsDistances(distances)
+	return distances
 }

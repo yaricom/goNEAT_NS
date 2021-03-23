@@ -1,8 +1,10 @@
 package maze
 
 import (
-	"testing"
 	"bytes"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestRecordStore_Write_Read(t *testing.T) {
@@ -13,7 +15,7 @@ func TestRecordStore_Write_Read(t *testing.T) {
 		{2, 11, 21, 41, false, 1, 0, 1, 1},
 		{3, 12, 22, 42, true, 1, 0, 1, 1},
 	}
-	rs.SolverPathPoints = [] Point {
+	rs.SolverPathPoints = []Point{
 		{0, 1},
 		{2, 3},
 		{4, 5},
@@ -24,45 +26,14 @@ func TestRecordStore_Write_Read(t *testing.T) {
 
 	// store records
 	err := rs.Write(&store)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err, "failed to save records")
 
 	// read records to the new store
-	nrs := new(RecordStore)
-
+	var nrs RecordStore
 	err = nrs.Read(&store)
-	if err != nil {
-		t.Error(err)
-	}
+	require.NoError(t, err, "failed to read records")
 
-	// check results
-	for i := 0; i < len(rs.Records); i++ {
-		if rs.Records[i].AgentID != nrs.Records[i].AgentID {
-			t.Error("rs.Records[i].AgentID != nrs.Records[i].AgentID")
-		}
-		if rs.Records[i].X != nrs.Records[i].X {
-			t.Error("rs.Records[i].X != nrs.Records[i].X")
-		}
-		if rs.Records[i].Y != nrs.Records[i].Y {
-			t.Error("rs.Records[i].Y != nrs.Records[i].Y")
-		}
-		if rs.Records[i].Fitness != nrs.Records[i].Fitness {
-			t.Error("rs.Records[i].Fitness != nrs.Records[i].Fitness")
-		}
-		if rs.Records[i].GotExit != nrs.Records[i].GotExit {
-			t.Error("rs.Records[i].GotExit != nrs.Records[i].GotExit")
-		}
-	}
-
-	for i := 0; i < len(rs.SolverPathPoints); i++ {
-		if rs.SolverPathPoints[i].X != nrs.SolverPathPoints[i].X {
-			t.Error("rs.SolverPathPoints[i].X != nrs.SolverPathPoints[i].X",
-				rs.SolverPathPoints[i].X, nrs.SolverPathPoints[i].X)
-		}
-		if rs.SolverPathPoints[i].Y != nrs.SolverPathPoints[i].Y {
-			t.Error("rs.SolverPathPoints[i].Y != nrs.SolverPathPoints[i].Y",
-				rs.SolverPathPoints[i].Y, nrs.SolverPathPoints[i].Y)
-		}
-	}
+	// check that saved records match original
+	assert.ElementsMatch(t, rs.Records, nrs.Records, "wrong records saved")
+	assert.ElementsMatch(t, rs.SolverPathPoints, nrs.SolverPathPoints, "wrong solver path points saved")
 }
