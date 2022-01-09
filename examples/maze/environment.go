@@ -12,12 +12,12 @@ import (
 // The maximal allowed speed for maze agent
 const maxAgentSpeed = 3.0
 
-// The simple point class
+// Point the simple point class
 type Point struct {
 	X, Y float64
 }
 
-// Reads Point from specified reader
+// ReadPoint reads Point from specified reader
 func ReadPoint(lr io.Reader) (*Point, error) {
 	point := &Point{}
 	if _, err := fmt.Fscanf(lr, "%f %f", &point.X, &point.Y); err != nil {
@@ -26,7 +26,8 @@ func ReadPoint(lr io.Reader) (*Point, error) {
 	return point, nil
 }
 
-// To determine angle in degrees of vector defined by (0,0)->This Point. The angle is from 0 to 360 degrees anti clockwise.
+// Angle is to determine angle in degrees of vector defined by (0,0)->This Point.
+// The angle is from 0 to 360 degrees anti-clockwise.
 func (p Point) Angle() float64 {
 	ang := math.Atan2(p.Y, p.X) / math.Pi * 180.0
 	if ang < 0.0 {
@@ -36,7 +37,7 @@ func (p Point) Angle() float64 {
 	return ang
 }
 
-// To rotate this point around another point with given angle in degrees
+// Rotate is to rotate this point around another point with given angle in degrees
 func (p *Point) Rotate(angle float64, point Point) {
 	rad := angle / 180.0 * math.Pi
 	p.X -= point.X
@@ -50,29 +51,28 @@ func (p *Point) Rotate(angle float64, point Point) {
 	p.Y += point.Y
 }
 
-// To find distance between this point and another point
+// Distance is to find distance between this point and another point
 func (p Point) Distance(point Point) float64 {
 	dx := point.X - p.X
 	dy := point.Y - p.Y
 	return math.Sqrt(dx*dx + dy*dy)
 }
 
-// The simple line segment class, used for maze walls
+// Line the simple line segment class, used for maze walls
 type Line struct {
 	A, B Point
 }
 
-// To create new line
+// NewLine creates new line
 func NewLine(a, b Point) Line {
 	return Line{A: a, B: b}
 }
 
-// Reads line from specified reader
+// ReadLine reads line from specified reader
 func ReadLine(lr io.Reader) (*Line, error) {
 	a := Point{}
 	b := Point{}
-	_, err := fmt.Fscanf(lr, "%f %f %f %f", &a.X, &a.Y, &b.X, &b.Y)
-	if err != nil {
+	if _, err := fmt.Fscanf(lr, "%f %f %f %f", &a.X, &a.Y, &b.X, &b.Y); err != nil {
 		return nil, err
 	}
 
@@ -80,7 +80,7 @@ func ReadLine(lr io.Reader) (*Line, error) {
 	return &line, nil
 }
 
-// To find midpoint of the line segment
+// Midpoint is to find midpoint of the line segment
 func (l Line) Midpoint() Point {
 	midpoint := Point{}
 	midpoint.X = (l.A.X + l.B.X) / 2.0
@@ -88,7 +88,7 @@ func (l Line) Midpoint() Point {
 	return midpoint
 }
 
-// Returns point of intersection between two line segments if it exists
+// Intersection calculates point of intersection between two line segments if it exists
 func (l Line) Intersection(line Line) (bool, Point) {
 	pt := Point{}
 	A, B, C, D := l.A, l.B, line.A, line.B
@@ -115,7 +115,7 @@ func (l Line) Intersection(line Line) (bool, Point) {
 	return false, pt
 }
 
-// To find distance between line segment and the point
+// Distance is to find distance between line segment and the point
 func (l Line) Distance(p Point) float64 {
 	utop := (p.X-l.A.X)*(l.B.X-l.A.X) + (p.Y-l.A.Y)*(l.B.Y-l.A.Y)
 	ubot := l.A.Distance(l.B)
@@ -139,12 +139,12 @@ func (l Line) Distance(p Point) float64 {
 	return point.Distance(p)
 }
 
-// The line segment length
+// Length calculates the line segment length
 func (l Line) Length() float64 {
 	return l.A.Distance(l.B)
 }
 
-// The class for the maze navigator agent
+// Agent represents the maze navigator agent
 type Agent struct {
 	// The current location
 	Location Point
@@ -172,7 +172,7 @@ type Agent struct {
 	RangeFinders []float64
 }
 
-// Creates new Agent with default settings
+// NewAgent creates new Agent with default settings
 func NewAgent() Agent {
 	agent := Agent{
 		Heading:          0.0,
@@ -195,7 +195,7 @@ func NewAgent() Agent {
 	return agent
 }
 
-// The maze environment class
+// Environment the maze environment definition
 type Environment struct {
 	// The maze navigating agent
 	Hero Agent
@@ -219,7 +219,7 @@ type Environment struct {
 	initialDistance float64
 }
 
-// Reads maze environment from reader
+// ReadEnvironment reads maze environment from the reader
 func ReadEnvironment(ir io.Reader) (*Environment, error) {
 	env := Environment{}
 	env.Hero = NewAgent()
@@ -259,13 +259,18 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 
 		default:
 			// read maze line segments
-			line, err := ReadLine(lr)
-			if err == nil {
+			if line, err := ReadLine(lr); err != nil {
+				return nil, err
+			} else {
 				env.Lines = append(env.Lines, *line)
 			}
 		}
 
 		index++
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
 	}
 
 	if numLines != len(env.Lines) {
@@ -285,7 +290,7 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 	return &env, err
 }
 
-// create neural net inputs from maze agent sensors
+// GetInputs create neural net inputs from maze agent sensors
 func (e *Environment) GetInputs() ([]float64, error) {
 	inputsSize := len(e.Hero.RangeFinders) + len(e.Hero.Radar) + 1
 	inputs := make([]float64, inputsSize)
@@ -312,7 +317,7 @@ func (e *Environment) GetInputs() ([]float64, error) {
 	return inputs, nil
 }
 
-// transform neural net outputs into angular velocity and speed
+// ApplyOutputs transform neural net outputs into angular velocity and speed
 func (e *Environment) ApplyOutputs(o1, o2 float64) error {
 	if math.IsNaN(o1) || math.IsNaN(o2) {
 		return errors.New("OUTPUT is NAN")
@@ -338,7 +343,7 @@ func (e *Environment) ApplyOutputs(o1, o2 float64) error {
 	return nil
 }
 
-// Do one time step of the simulation
+// Update does one time step of the simulation
 func (e *Environment) Update() error {
 	if e.ExitFound {
 		return nil
@@ -369,13 +374,13 @@ func (e *Environment) Update() error {
 	}
 
 	// Find next agent's location
-	newloc := Point{
+	newLoc := Point{
 		X: vx + e.Hero.Location.X,
 		Y: vy + e.Hero.Location.Y,
 	}
-	if !e.testAgentCollision(newloc) {
-		e.Hero.Location.X = newloc.X
-		e.Hero.Location.Y = newloc.Y
+	if !e.testAgentCollision(newLoc) {
+		e.Hero.Location.X = newLoc.X
+		e.Hero.Location.Y = newLoc.Y
 	}
 	err := e.updateRangefinders()
 	if err != nil {
@@ -389,7 +394,7 @@ func (e *Environment) Update() error {
 	return nil
 }
 
-// Used to test if agent location is within maze exit range
+// testExitFoundByAgent is to test if agent location is within maze exit range
 func (e *Environment) testExitFoundByAgent() bool {
 	if e.ExitFound {
 		return true
@@ -399,7 +404,7 @@ func (e *Environment) testExitFoundByAgent() bool {
 	return dist < e.ExitFoundRange
 }
 
-// used for fitness calculations based on distance of maze Agent to the target maze exit
+// AgentDistanceToExit used for fitness calculations based on distance of maze Agent to the target maze exit
 func (e *Environment) AgentDistanceToExit() float64 {
 	return e.Hero.Location.Distance(e.MazeExit)
 }
@@ -450,7 +455,7 @@ func (e *Environment) updateRangefinders() error {
 	return nil
 }
 
-// update radar sensors
+// updateRadar is to update radar sensors
 func (e *Environment) updateRadar() {
 	target := e.MazeExit
 
@@ -476,7 +481,7 @@ func (e *Environment) updateRadar() {
 	}
 }
 
-// see if provided new location hits anything in maze
+// testAgentCollision is to see if provided new location hits anything in maze
 func (e *Environment) testAgentCollision(loc Point) bool {
 	for j := 0; j < len(e.Lines); j++ {
 		if e.Lines[j].Distance(loc) < e.Hero.Radius {

@@ -30,9 +30,6 @@ print_every 100
 babies_stolen 0
 num_runs 1
 num_generations 2000
-log_level 1
-
-
-linktrait_mut_sig 1.0
-nodetrait_mut_sig 0.5
-recur_prob 0.15
+log_level info
+epoch_executor sequential
+genome_compat_method linear
