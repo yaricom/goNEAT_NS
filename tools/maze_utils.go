@@ -278,10 +278,8 @@ func main() {
 	switch *operation {
 	case "draw_agents":
 		err = drawMazeWithRecords(recFile, mazeFile, *bestThreshold, *groupByAge, dc)
-		break
 	case "draw_path":
 		err = drawMazeWithPath(recFile, mazeFile, dc)
-		break
 	default:
 		log.Fatalf("Usupported drawing operation requested: %s", *operation)
 
