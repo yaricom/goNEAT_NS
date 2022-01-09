@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-// The record holding info about individual maze agent performance at the end of simulation
+// AgentRecord is the record holding info about individual maze agent performance at the end of simulation
 type AgentRecord struct {
 	// The ID of agent
 	AgentID int
@@ -27,7 +27,7 @@ type AgentRecord struct {
 	SpeciesAge int
 }
 
-// The maze agent records storage
+// RecordStore the maze agent records storage
 type RecordStore struct {
 	// The array of agent records
 	Records []AgentRecord

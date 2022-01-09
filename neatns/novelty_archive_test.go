@@ -3,8 +3,8 @@ package neatns
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yaricom/goNEAT/neat"
-	"github.com/yaricom/goNEAT/neat/genetics"
+	"github.com/yaricom/goNEAT/v2/neat"
+	"github.com/yaricom/goNEAT/v2/neat/genetics"
 	"math/rand"
 	"strings"
 	"testing"
@@ -83,7 +83,7 @@ func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
 	rand.Seed(42)
 	in, out, nmax := 3, 2, 5
 	linkProb := 0.5
-	conf := neat.NeatContext{
+	conf := neat.Options{
 		CompatThreshold: 0.5,
 		PopSize:         10,
 	}
@@ -124,7 +124,7 @@ func TestNoveltyArchive_EvaluatePopulation(t *testing.T) {
 	rand.Seed(42)
 	in, out, nmax := 3, 2, 5
 	linkProb := 0.5
-	conf := neat.NeatContext{
+	conf := neat.Options{
 		CompatThreshold: 0.5,
 		PopSize:         10,
 	}

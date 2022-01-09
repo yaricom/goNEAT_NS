@@ -3,8 +3,8 @@ package neatns
 import (
 	"errors"
 	"fmt"
-	"github.com/yaricom/goNEAT/neat"
-	"github.com/yaricom/goNEAT/neat/genetics"
+	"github.com/yaricom/goNEAT/v2/neat"
+	"github.com/yaricom/goNEAT/v2/neat/genetics"
 	"io"
 	"sort"
 )
@@ -14,13 +14,13 @@ const fittestAllowedSize = 5
 
 const archiveSeedAmount = 1
 
-// The novelty archive contains all of the novel items we have encountered thus far.
+// NoveltyArchive The novelty archive contains all the novel items we have encountered thus far.
 // Using a novelty metric we can determine how novel a new item is compared to everything
 // currently in the novelty set
 type NoveltyArchive struct {
 	// the all the novel items we have found so far
 	NovelItems []*NoveltyItem
-	// the all novel items with fittest organisms associated found so far
+	// the all novel items with the fittest organisms associated found so far
 	FittestItems NoveltyItemsByFitness
 
 	// the current generation
@@ -46,7 +46,7 @@ type NoveltyArchive struct {
 	neighbors int
 }
 
-// Creates new instance of novelty archive
+// NewNoveltyArchive creates new instance of novelty archive
 func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive {
 	arch := NoveltyArchive{
 		NovelItems:       make([]*NoveltyItem, 0),
@@ -60,7 +60,7 @@ func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive 
 	return &arch
 }
 
-// evaluate the novelty of a single individual organism within population and update its fitness (onlyFitness = true)
+// EvaluateIndividualNovelty evaluates the novelty of a single individual organism within population and update its fitness (onlyFitness = true)
 // or store individual's novelty item into archive
 func (a *NoveltyArchive) EvaluateIndividualNovelty(org *genetics.Organism, pop *genetics.Population, onlyFitness bool) {
 	if org.Data == nil {
@@ -90,7 +90,7 @@ func (a *NoveltyArchive) EvaluateIndividualNovelty(org *genetics.Organism, pop *
 	org.Data.Value = item
 }
 
-// evaluate the novelty of the whole population and update organisms fitness (onlyFitness = true)
+// EvaluatePopulationNovelty evaluates the novelty of the whole population and update organisms fitness (onlyFitness = true)
 // or store each population individual's novelty items into archive
 func (a *NoveltyArchive) EvaluatePopulationNovelty(pop *genetics.Population, onlyFitness bool) {
 	for _, o := range pop.Organisms {
@@ -98,7 +98,7 @@ func (a *NoveltyArchive) EvaluatePopulationNovelty(pop *genetics.Population, onl
 	}
 }
 
-// to maintain list of fittest organisms so far
+// UpdateFittestWithOrganism to maintain list of the fittest organisms so far
 func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error {
 	if org.Data == nil {
 		return errors.New("organism with no Data provided")
@@ -130,14 +130,14 @@ func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error
 	return nil
 }
 
-// the steady-state end of generation call
+// EndOfGeneration the steady-state end of generation call
 func (a *NoveltyArchive) EndOfGeneration() {
 	a.Generation++
 
 	a.adjustArchiveSettings()
 }
 
-// prints collected novelty points to provided writer
+// PrintNoveltyPoints prints collected novelty points to provided writer
 func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
 	if len(a.NovelItems) == 0 {
 		return errors.New("no novel items to print")
@@ -151,7 +151,7 @@ func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
 	return nil
 }
 
-// prints collected individuals with maximal fitness
+// PrintFittest prints collected individuals with maximal fitness
 func (a *NoveltyArchive) PrintFittest(w io.Writer) error {
 	if len(a.FittestItems) == 0 {
 		return errors.New("no fittest items to print")
@@ -165,7 +165,7 @@ func (a *NoveltyArchive) PrintFittest(w io.Writer) error {
 	return nil
 }
 
-// add novelty item to archive
+// addNoveltyItem adds novelty item to archive
 func (a *NoveltyArchive) addNoveltyItem(i *NoveltyItem) {
 	i.added = true
 	i.Generation = a.Generation
@@ -173,7 +173,7 @@ func (a *NoveltyArchive) addNoveltyItem(i *NoveltyItem) {
 	a.itemsAddedInGeneration++
 }
 
-// to adjust dynamic novelty threshold depending on how many have been added to archive recently
+// adjustArchiveSettings is to adjust dynamic novelty threshold depending on how many have been added to archive recently
 func (a *NoveltyArchive) adjustArchiveSettings() {
 	if a.itemsAddedInGeneration == 0 {
 		a.timeOut++
@@ -199,7 +199,7 @@ func (a *NoveltyArchive) adjustArchiveSettings() {
 	a.generationIndex = len(a.NovelItems)
 }
 
-// the K nearest neighbor novelty score calculation for given item within provided population if any
+// noveltyAvgKnn allows the K nearest neighbor novelty score calculation for given item within provided population
 func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neigh int, pop *genetics.Population) float64 {
 	var novelties ItemsDistances
 	if pop != nil {
@@ -234,7 +234,7 @@ func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neigh int, pop *geneti
 	return density
 }
 
-// map the novelty metric across the archive against provided item
+// mapNovelty maps the novelty metric across the archive against provided item
 func (a *NoveltyArchive) mapNovelty(item *NoveltyItem) ItemsDistances {
 	distances := make([]ItemsDistance, len(a.NovelItems))
 	for i := 0; i < len(a.NovelItems); i++ {
@@ -247,7 +247,7 @@ func (a *NoveltyArchive) mapNovelty(item *NoveltyItem) ItemsDistances {
 	return distances
 }
 
-// map the novelty metric across the archive and the current population
+// mapNoveltyInPopulation maps the novelty metric across the archive and the current population
 func (a *NoveltyArchive) mapNoveltyInPopulation(item *NoveltyItem, pop *genetics.Population) ItemsDistances {
 	distances := make([]ItemsDistance, len(a.NovelItems))
 	nIndex := 0
