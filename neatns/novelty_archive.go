@@ -5,14 +5,8 @@ import (
 	"fmt"
 	"github.com/yaricom/goNEAT/v2/neat"
 	"github.com/yaricom/goNEAT/v2/neat/genetics"
-	"io"
 	"sort"
 )
-
-// The maximal allowed size for fittest items list
-const fittestAllowedSize = 5
-
-const archiveSeedAmount = 1
 
 // NoveltyArchive The novelty archive contains all the novel items we have encountered thus far.
 // Using a novelty metric we can determine how novel a new item is compared to everything
@@ -42,20 +36,19 @@ type NoveltyArchive struct {
 	// the counter to keep track of how many gens since we've added to the archive
 	timeOut int
 
-	// the parameter for how many neighbors to look at for N-nearest neighbor distance novelty
-	neighbors int
+	options NoveltyArchiveOptions
 }
 
 // NewNoveltyArchive creates new instance of novelty archive
-func NewNoveltyArchive(threshold float64, metric NoveltyMetric) *NoveltyArchive {
+func NewNoveltyArchive(threshold float64, metric NoveltyMetric, options NoveltyArchiveOptions) *NoveltyArchive {
 	arch := NoveltyArchive{
 		NovelItems:       make([]*NoveltyItem, 0),
 		FittestItems:     make([]*NoveltyItem, 0),
 		noveltyMetric:    metric,
-		neighbors:        KNNNoveltyScore,
 		noveltyFloor:     0.25,
 		noveltyThreshold: threshold,
-		generationIndex:  archiveSeedAmount,
+		generationIndex:  options.ArchiveSeedAmount,
+		options:          options,
 	}
 	return &arch
 }
@@ -77,7 +70,7 @@ func (a *NoveltyArchive) EvaluateIndividualNovelty(org *genetics.Organism, pop *
 	} else {
 		// consider adding a point to archive based on dist to nearest neighbor
 		result = a.noveltyAvgKnn(item, 1, nil)
-		if result > a.noveltyThreshold || len(a.NovelItems) < archiveSeedAmount {
+		if result > a.noveltyThreshold || len(a.NovelItems) < a.options.ArchiveSeedAmount {
 			a.addNoveltyItem(item)
 			item.Age += 1.0
 		}
@@ -104,7 +97,7 @@ func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error
 		return errors.New("organism with no Data provided")
 	}
 
-	if len(a.FittestItems) < fittestAllowedSize {
+	if len(a.FittestItems) < a.options.FittestAllowedSize {
 		// store organism's novelty item into fittest
 		item := org.Data.Value.(*NoveltyItem)
 		a.FittestItems = append(a.FittestItems, item)
@@ -122,7 +115,7 @@ func (a *NoveltyArchive) UpdateFittestWithOrganism(org *genetics.Organism) error
 			sort.Sort(sort.Reverse(a.FittestItems))
 
 			// remove less fit item
-			items := make([]*NoveltyItem, fittestAllowedSize)
+			items := make([]*NoveltyItem, a.options.FittestAllowedSize)
 			copy(items, a.FittestItems)
 			a.FittestItems = items
 		}
@@ -135,34 +128,6 @@ func (a *NoveltyArchive) EndOfGeneration() {
 	a.Generation++
 
 	a.adjustArchiveSettings()
-}
-
-// PrintNoveltyPoints prints collected novelty points to provided writer
-func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
-	if len(a.NovelItems) == 0 {
-		return errors.New("no novel items to print")
-	}
-	for _, p := range a.NovelItems {
-		str := p.String()
-		if _, err := fmt.Fprintln(w, str); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// PrintFittest prints collected individuals with maximal fitness
-func (a *NoveltyArchive) PrintFittest(w io.Writer) error {
-	if len(a.FittestItems) == 0 {
-		return errors.New("no fittest items to print")
-	}
-	for _, f := range a.FittestItems {
-		str := f.String()
-		if _, err := fmt.Fprintln(w, str); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // addNoveltyItem adds novelty item to archive
@@ -200,7 +165,7 @@ func (a *NoveltyArchive) adjustArchiveSettings() {
 }
 
 // noveltyAvgKnn allows the K nearest neighbor novelty score calculation for given item within provided population
-func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neigh int, pop *genetics.Population) float64 {
+func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neighbors int, pop *genetics.Population) float64 {
 	var novelties ItemsDistances
 	if pop != nil {
 		novelties = a.mapNoveltyInPopulation(item, pop)
@@ -210,24 +175,24 @@ func (a *NoveltyArchive) noveltyAvgKnn(item *NoveltyItem, neigh int, pop *geneti
 
 	// sort by distance - minimal first
 	sort.Sort(novelties)
-
-	density, sum, weight := 0.0, 0.0, 0.0
 	length := len(novelties)
 
 	// if neighbors size not set - use value from archive parameters
-	if neigh == -1 {
-		neigh = a.neighbors
+	if neighbors == -1 {
+		neighbors = a.options.KNNNoveltyScore
 	}
 
-	if length >= archiveSeedAmount {
-		for i := 0; weight < float64(neigh) && i < len(novelties); i++ {
+	density := 0.0
+	if length >= a.options.ArchiveSeedAmount {
+		sum, count := 0.0, 0.0
+		for i := 0; count < float64(neighbors) && i < len(novelties); i++ {
 			sum += novelties[i].distance
-			weight += 1.0
+			count += 1.0
 		}
 
 		// find average
-		if weight > 0 {
-			density = sum / weight
+		if count > 0 {
+			density = sum / count
 		}
 	}
 
