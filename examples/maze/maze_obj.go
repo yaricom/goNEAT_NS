@@ -41,7 +41,7 @@ func (e objectiveEvaluator) TrialRunStarted(trial *experiment.Trial) {
 	trialSim = mazeSimResults{
 		trialID: trial.Id,
 		records: new(RecordStore),
-		archive: neatns.NewNoveltyArchive(archiveThresh, noveltyMetric),
+		archive: neatns.NewNoveltyArchive(archiveThresh, noveltyMetric, neatns.DefaultNoveltyArchiveOptions()),
 	}
 }
 
@@ -160,6 +160,10 @@ func (e *objectiveEvaluator) orgEvaluate(org *genetics.Organism, _ *genetics.Pop
 	// evaluate individual organism and get novelty point holding simulation results
 	nItem, solved, err := mazeSimulationEvaluate(e.MazeEnv, org, &record, nil)
 	if err != nil {
+		if err == ErrOutputIsNaN {
+			// corrupted genome, but OK to continue evolutionary process
+			return false, nil
+		}
 		return false, err
 	}
 	nItem.IndividualID = org.Genotype.Id

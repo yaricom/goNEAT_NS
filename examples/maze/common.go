@@ -46,9 +46,9 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 	// get Organism phenotype's network depth
 	netDepth, err := org.Phenotype.MaxActivationDepthFast(1) // The max depth of the network to be activated
 	if err != nil {
-		neat.WarnLog(fmt.Sprintf(
-			"Failed to estimate maximal depth of the network:\n%s\nUsing default depth: %d",
-			org.Genotype, netDepth))
+		neat.DebugLog(fmt.Sprintf(
+			"Failed to estimate maximal depth of the network. Using default depth: %d", netDepth))
+		neat.DebugLog(fmt.Sprintf("Genome: %s", org.Genotype))
 	}
 	neat.DebugLog(fmt.Sprintf("Network depth: %d for organism: %d\n", netDepth, org.Genotype.Id))
 	if netDepth == 0 {

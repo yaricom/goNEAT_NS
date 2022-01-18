@@ -1,7 +1,6 @@
 package maze
 
 import (
-	"errors"
 	"fmt"
 	"github.com/yaricom/goNEAT/v2/experiment"
 	"github.com/yaricom/goNEAT/v2/experiment/utils"
@@ -49,10 +48,12 @@ type noveltySearchEvaluator struct {
 }
 
 func (e noveltySearchEvaluator) TrialRunStarted(trial *experiment.Trial) {
+	opts := neatns.DefaultNoveltyArchiveOptions()
+	opts.KNNNoveltyScore = 10
 	trialSim = mazeSimResults{
 		trialID: trial.Id,
 		records: new(RecordStore),
-		archive: neatns.NewNoveltyArchive(archiveThresh, noveltyMetric),
+		archive: neatns.NewNoveltyArchive(archiveThresh, noveltyMetric, opts),
 	}
 }
 
@@ -74,16 +75,19 @@ func (e noveltySearchEvaluator) GenerationEvaluate(pop *genetics.Population, epo
 			return err
 		}
 		// store fitness based on objective proximity for statistical purposes
-		pop.Organisms[i].Fitness = org.Data.Value.(*neatns.NoveltyItem).Fitness
+		if org.Data == nil {
+			neat.ErrorLog(fmt.Sprintf("Novelty point not found at organism: %s", org))
+			pop.Organisms[i].Fitness = 0.0
+		} else {
+			pop.Organisms[i].Fitness = org.Data.Value.(*neatns.NoveltyItem).Fitness
+		}
+
 		if res && (epoch.Best == nil || org.Fitness > epoch.Best.Fitness) {
 			epoch.Solved = true
 			epoch.WinnerNodes = len(org.Genotype.Nodes)
 			epoch.WinnerGenes = org.Genotype.Extrons()
 			epoch.WinnerEvals = trialSim.individualsCounter
 			epoch.Best = org
-		}
-		if org.Data == nil {
-			return errors.New(fmt.Sprintf("Novelty point not found at organism: %s", org))
 		}
 	}
 
@@ -191,6 +195,10 @@ func (e *noveltySearchEvaluator) orgEvaluate(org *genetics.Organism, pop *geneti
 	// evaluate individual organism and get novelty point
 	nItem, solved, err := mazeSimulationEvaluate(e.MazeEnv, org, &record, nil)
 	if err != nil {
+		if err == ErrOutputIsNaN {
+			// corrupted genome, but OK to continue evolutionary process
+			return false, nil
+		}
 		return false, err
 	}
 	nItem.IndividualID = org.Genotype.Id
