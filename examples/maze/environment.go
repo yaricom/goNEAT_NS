@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+// ErrOutputIsNaN to be returned if one of the network output values is NaN
+var ErrOutputIsNaN = errors.New("OUTPUT is NAN")
+
 // The maximal allowed speed for maze agent
 const maxAgentSpeed = 3.0
 
@@ -230,7 +233,11 @@ func ReadEnvironment(ir io.Reader) (*Environment, error) {
 	scanner.Split(bufio.ScanLines)
 	index, numLines := 0, 0
 	for scanner.Scan() {
-		line := scanner.Text()
+		line := strings.TrimSpace(scanner.Text())
+		if len(line) == 0 || strings.HasPrefix(line, "#") {
+			// skip empty lines
+			continue
+		}
 		lr := strings.NewReader(line)
 		switch index {
 		case 0: // read in how many line segments
@@ -320,7 +327,7 @@ func (e *Environment) GetInputs() ([]float64, error) {
 // ApplyOutputs transform neural net outputs into angular velocity and speed
 func (e *Environment) ApplyOutputs(o1, o2 float64) error {
 	if math.IsNaN(o1) || math.IsNaN(o2) {
-		return errors.New("OUTPUT is NAN")
+		return ErrOutputIsNaN
 	}
 
 	e.Hero.AngularVelocity += o1 - 0.5

@@ -1,13 +1,19 @@
+# Number of maze walls, including boundaries
 11
+# The initial position of the agent
 36 184
+# The initial heading angle of the agent
 0
+# The maze exit position
 31 20
 
+# Maze boundaries
 5 5 5 200
 5 200 200 200
 200 200 200 5
 200 5 5 5
 
+# Maze walls
 5 49 57 53
 56 54 56 157
 57 106 158 162
