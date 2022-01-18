@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-const gnome_str = "genomestart 1\n" +
+const genomeStr = "genomestart 1\n" +
 	"trait 1 0.1 0 0 0 0 0 0 0\n" +
 	"trait 2 0.2 0 0 0 0 0 0 0\n" +
 	"trait 3 0.3 0 0 0 0 0 0 0\n" +
@@ -25,10 +25,11 @@ const gnome_str = "genomestart 1\n" +
 
 // tests archive update by fittest organisms
 func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
-	archive := NewNoveltyArchive(1.0, nil)
+	opts := DefaultNoveltyArchiveOptions()
+	archive := NewNoveltyArchive(1.0, nil, opts)
 
 	// test normal update
-	gen, err := genetics.ReadGenome(strings.NewReader(gnome_str), 1)
+	gen, err := genetics.ReadGenome(strings.NewReader(genomeStr), 1)
 	require.NoError(t, err, "failed to read genome")
 
 	org, err := genetics.NewOrganism(0.1, gen, 1)
@@ -38,15 +39,15 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 	require.NoError(t, err, "failed to update fittest")
 	require.Len(t, archive.FittestItems, 1)
 
-	for i := 2; i <= fittestAllowedSize; i++ {
+	for i := 2; i <= opts.FittestAllowedSize; i++ {
 		org, err = genetics.NewOrganism(0.1*float64(i), gen, 1)
 		require.NoError(t, err, "failed to create new organism at: %d", i)
 		err = archive.UpdateFittestWithOrganism(fillOrganismData(org, 0.0))
 		require.NoError(t, err, "failed to update fittest at: %d", i)
 	}
 
-	for i := 0; i < fittestAllowedSize; i++ {
-		expected := float64(fittestAllowedSize-i) * 0.1
+	for i := 0; i < opts.FittestAllowedSize; i++ {
+		expected := float64(opts.FittestAllowedSize-i) * 0.1
 		assert.Equal(t, expected, archive.FittestItems[i].Fitness, "wrong item fitness at: %d", i)
 	}
 
@@ -56,14 +57,14 @@ func TestNoveltyArchive_updateFittestWithOrganism(t *testing.T) {
 	require.NoError(t, err, "failed to create new organism")
 	err = archive.UpdateFittestWithOrganism(fillOrganismData(org, 0.0))
 	require.NoError(t, err, "failed to update fittest")
-	require.Len(t, archive.FittestItems, fittestAllowedSize)
+	require.Len(t, archive.FittestItems, opts.FittestAllowedSize)
 
 	assert.Equal(t, fitness, archive.FittestItems[0].Fitness, "The item with maximal fitness at wrong position")
 }
 
 func TestNoveltyArchive_addNoveltyItem(t *testing.T) {
-	archive := NewNoveltyArchive(1.0, nil)
-	gen, err := genetics.ReadGenome(strings.NewReader(gnome_str), 1)
+	archive := NewNoveltyArchive(1.0, nil, DefaultNoveltyArchiveOptions())
+	gen, err := genetics.ReadGenome(strings.NewReader(genomeStr), 1)
 	require.NoError(t, err, "failed to read genome")
 	org, err := genetics.NewOrganism(0.1, gen, 1)
 	require.NoError(t, err, "failed to create new organism")
@@ -81,25 +82,11 @@ func TestNoveltyArchive_addNoveltyItem(t *testing.T) {
 
 func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
 	rand.Seed(42)
-	in, out, nmax := 3, 2, 5
-	linkProb := 0.5
-	conf := neat.Options{
-		CompatThreshold: 0.5,
-		PopSize:         10,
-	}
-	pop, err := genetics.NewPopulationRandom(in, out, nmax, false, linkProb, &conf)
+	pop, err := createRandomPopulation(3, 2, 5, 0.5)
 	require.NoError(t, err, "failed to create population")
 	require.NotNil(t, pop, "population expected")
 
-	for i := 0; i < len(pop.Organisms); i++ {
-		pop.Organisms[i].Fitness = 0.1 * (1.0 + float64(i))
-		fillOrganismData(pop.Organisms[i], 0.1*(1.0+float64(i)))
-	}
-
-	metric := func(x, y *NoveltyItem) float64 {
-		return (x.Fitness - y.Fitness) * (x.Fitness - y.Fitness)
-	}
-	archive := NewNoveltyArchive(1.0, metric)
+	archive := NewNoveltyArchive(1.0, squareMetric, DefaultNoveltyArchiveOptions())
 	archive.Generation = 2
 
 	// test evaluate only in archive
@@ -122,25 +109,11 @@ func TestNoveltyArchive_EvaluateIndividual(t *testing.T) {
 
 func TestNoveltyArchive_EvaluatePopulation(t *testing.T) {
 	rand.Seed(42)
-	in, out, nmax := 3, 2, 5
-	linkProb := 0.5
-	conf := neat.Options{
-		CompatThreshold: 0.5,
-		PopSize:         10,
-	}
-	pop, err := genetics.NewPopulationRandom(in, out, nmax, false, linkProb, &conf)
+	pop, err := createRandomPopulation(3, 2, 5, 0.5)
 	require.NoError(t, err, "failed to create population")
 	require.NotNil(t, pop, "population expected")
 
-	for i := 0; i < len(pop.Organisms); i++ {
-		pop.Organisms[i].Fitness = 0.1 * (1.0 + float64(i))
-		fillOrganismData(pop.Organisms[i], 0.1*(1.0+float64(i)))
-	}
-
-	metric := func(x, y *NoveltyItem) float64 {
-		return (x.Fitness - y.Fitness) * (x.Fitness - y.Fitness)
-	}
-	archive := NewNoveltyArchive(0.1, metric)
+	archive := NewNoveltyArchive(0.1, squareMetric, DefaultNoveltyArchiveOptions())
 	archive.Generation = 2
 
 	// test update fitness scores
@@ -156,11 +129,34 @@ func TestNoveltyArchive_EvaluatePopulation(t *testing.T) {
 	assert.Len(t, archive.NovelItems, 3, "wrong NovelItems count in the archive")
 }
 
+func createRandomPopulation(in, out, maxHidden int, linkProb float64) (*genetics.Population, error) {
+	conf := &neat.Options{
+		CompatThreshold: 0.5,
+		PopSize:         10,
+	}
+	pop, err := genetics.NewPopulationRandom(in, out, maxHidden, false, linkProb, conf)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(pop.Organisms); i++ {
+		pop.Organisms[i].Fitness = 0.1 * (1.0 + float64(i))
+		fillOrganismData(pop.Organisms[i], 0.1*(1.0+float64(i)))
+	}
+
+	return pop, nil
+}
+
+func squareMetric(x, y *NoveltyItem) float64 {
+	return (x.Fitness - y.Fitness) * (x.Fitness - y.Fitness)
+}
+
 func fillOrganismData(org *genetics.Organism, novelty float64) *genetics.Organism {
 	ni := NoveltyItem{
 		Generation: org.Generation,
 		Fitness:    org.Fitness,
 		Novelty:    novelty,
+		Data:       []float64{0.1},
 	}
 	org.Data = &genetics.OrganismData{Value: &ni}
 	return org
