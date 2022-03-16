@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/yaricom/goNEAT_NS.svg?branch=master)](https://travis-ci.org/yaricom/goNEAT_NS) [![GoDoc](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns?status.svg)](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns)
+[![version](https://img.shields.io/github/v/tag/yaricom/goNEAT_NS.svg?sort=semver)](https://github.com/yaricom/goNEAT_NS/releases/latest)
+[![Build Status](https://travis-ci.org/yaricom/goNEAT_NS.svg?branch=master)](https://travis-ci.org/yaricom/goNEAT_NS) [![GoDoc](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns?status.svg)](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns) [![Go version](https://img.shields.io/badge/go-1.15-blue.svg)](https://github.com/moovweb/gvm) [![license](https://img.shields.io/github/license/yaricom/goNEAT_NS.svg)](https://github.com/yaricom/goNEAT_NS/blob/master/LICENSE) [![yaricom/goNEAT](https://tokei.rs/b1/github/yaricom/goNEAT_NS?category=lines)](https://github.com/yaricom/goNEAT_NS)
 
 ## Overview
 
@@ -10,26 +11,65 @@ optimal NN parameters and topology. Neuro-Evolution of NN may assume search for 
 NN nodes as well as search for optimal topology of resulting NN. The NEAT method implemented in this work do search for
 both: optimal connections weights and topology for given task (number of NN nodes per layer and their interconnections).
 
-The Novelty Search optimization allows to solve deceptive tasks with strong local optima which can not be solved by
+The Novelty Search optimization allows solving deceptive tasks with strong local optima which can not be solved by
 traditional objective-based fitness optimization functions. One of such problems is maze navigation where non-objective
 search methods like novelty search may outperform more traditional objective-based search methods. Our goal in this
 research is to test this hypothesis.
 
-#### System Requirements
+## Minimum Requirements
 
-The source code written and compiled against GO 1.9.x.
+The source code written and compiled against GO 1.15.x.
 
 ## Installation
 
-Make sure that you have at least GO 1.9.x. environment installed onto your system and execute following command:
+Make sure that you have at least GO 1.15.x. environment installed onto your system and execute following command:
 ```bash
 
-go get -t github.com/yaricom/goNEAT_NS
+go get -t github.com/yaricom/goNEAT_NS/v2
 ```
 
 This project is dependent on [goNEAT][3] project which will be installed automatically when command above executed.
 
-## Experiment Overview
+For new projects, consider using the v2 of the library with the following import:
+
+```go
+import "github.com/yaricom/goNEAT_NS/v2"
+```
+
+## Implementation Details
+
+The Novelty Search optimization method implemented on top of the [goNEAT][3] library using following essential types:
+
+* [NoveltyItem](neatns/novelty_item.go) is the structure to encapsulate information about discovered novel item. It is stored in the `NoveltyArchive` and used to determine the novelty of subsequent items discovered during the evolutionary process.
+* [NoveltyArchive](neatns/novelty_archive.go) is a collection of `NoveltyItem`s discovered so far which was added by passing `novelty threshold`. Thus, the archive tries to maintain only `NoveltyItem`s which distributed evenly through the solution search space. Such approach tries to explore any possible solution instead on focusing on single solution, which can seem beneficial right now but can fail to produce the successful solver. 
+
+In order to use `NoveltyArchive` you need to provide the `NoveltyMetric` implementation which is most suitable for the use case. 
+
+For example, in *maze solver example* the `NoveltyMetric` calculates distance between path of evaluated candidate solver and already added to the archive `NoveltyItem`s. Thus, novelty of the solver determined by uniqueness of the path through the maze it was able to find during the maze solving simulation. The source code looks like following (see [maze_ns](examples/maze/maze_ns.go)):
+
+```go
+var noveltyMetric neatns.NoveltyMetric = func(x, y *neatns.NoveltyItem) float64 {
+	diff := histDiff(x.Data, y.Data)
+	return diff
+}
+
+// calculates item-wise difference between two vectors
+func histDiff(left, right []float64) float64 {
+    size := len(left)
+    diffAccum := 0.0
+    for i := 0; i < size; i++ {
+    diff := left[i] - right[i]
+    diffAccum += math.Abs(diff)
+    }
+    return diffAccum / float64(size)
+}
+```
+
+For more details how to use Novelty Search implementation with [goNEAT][3] library please refer to the [maze solver example](examples/maze/maze_ns.go).
+
+Thereafter, we discuss maze solver examples and compare traditional objective-based optimization against Novelty Search optimization.
+
+## Examples Overview
 
 An illustrative domain for testing novelty search should have a deceptive fitness landscape. In such a domain, a search
 algorithm following the fitness gradient may perform worse than an algorithm following novelty gradients because novelty
@@ -116,10 +156,14 @@ fair because both scores are computed only based on the distance of the final po
 
 cd $GOPATH/src/github.com/yaricom/goNEAT_NS
 go run executor.go -out ./out/medium_mazens -context ./data/maze.neat -genome ./data/mazestartgenes -maze ./data/medium_maze.txt -experiment MAZENS
-
 ```
-Where: ./data/maze.neat is the configuration of NEAT execution context, ./data/mazestartgenes is the start genome
-configuration, and ./data/medium_maze.txt is a maze environment configuration.
+or 
+```bash
+make run-maze-ns-medium
+```
+
+**Where**: `./data/maze.neat` is the configuration of NEAT execution context, .`/data/mazestartgenes` is the start genome
+configuration, and `./data/medium_maze.txt` is a maze environment configuration.
 
 This command will execute one trial with 2000 generations (or less if winner is found) over population of 250 organisms.
 
@@ -195,6 +239,10 @@ cd $GOPATH/src/github.com/yaricom/goNEAT_NS
 go run executor.go -out ./out/hard_mazens -context ./data/maze.neat -genome ./data/mazestartgenes -maze ./data/hard_maze.txt -experiment MAZENS
 
 ```
+or
+```bash
+make run-maze-ns-hard
+```
 
 ![alt text][mazens_hard_winner_genome_graph]
 
@@ -250,10 +298,13 @@ The effect of this fitness function is to reward the solving agent for ending in
 
 cd $GOPATH/src/github.com/yaricom/goNEAT_NS
 go run executor.go -out ./out/mazeobj -context ./data/maze.neat -genome ./data/mazestartgenes -maze ./data/medium_maze.txt -experiment MAZEOBJ
-
 ```
-Where: ./data/maze.neat is the configuration of NEAT execution context, ./data/mazestartgenes is the start genome
-configuration, and ./data/medium_maze.txt is a maze environment configuration.
+or
+```bash
+make run-maze-objective-medium
+```
+**Where**: `./data/maze.neat` is the configuration of NEAT execution context, .`/data/mazestartgenes` is the start genome
+configuration, and `./data/medium_maze.txt` is a maze environment configuration.
 
 This command will execute one trial with 2000 generations (or less if winner is found) over population of 250 organisms.
 
@@ -306,10 +357,14 @@ maze (compare it with the NS based search above).
 
 cd $GOPATH/src/github.com/yaricom/goNEAT_NS
 go run executor.go -out ./out/mazeobj_hard -context ./data/maze.neat -genome ./data/mazestartgenes -maze ./data/hard_maze.txt -experiment MAZEOBJ
-
 ```
-Where: ./data/maze.neat is the configuration of NEAT execution context, ./data/mazestartgenes is the start genome
-configuration, and ./data/hard_maze.txt is a maze environment configuration.
+or
+```bash
+make run-maze-objective-medium
+```
+
+**Where**: `./data/maze.neat` is the configuration of NEAT execution context, .`/data/mazestartgenes` is the start genome
+configuration, and `./data/hard_maze.txt` is a maze environment configuration.
 
 After 10 trials objective-based optimization function was **unable to produce any successful hard maze solving agent**. The hard
 maze has deceptive cul-de-sacs, where objective-based fitness function has strong local optima. Thus when neuroevolution is
@@ -326,20 +381,28 @@ produced organism from solving hard maze configuration.
 
 ## Discussion
 
-In this work we have tested two approaches to perform fitness function optimization with NEAT algorithm: novelty search and
-objective-based. The novelty search optimization was found as outperforming method for solving of deceptive tasks when strong local
-optima present, such as maze solving. Our experiments based on two maze environments configurations: medium and hard maze.
+Here tested two approaches to perform solution search optimization with **NEAT** algorithm:
+
+* Novelty Search 
+* Objective-based fitness optimization
+
+The Novelty Search optimization demonstrated outstanding performance for solving of deceptive tasks when strong local optima present, such as maze solving. 
+
+We evaluated experiments based on two configurations of maze environments varied by complexity: 
+
+* medium  
+* hard  
 
 ### Medium maze results
 
 With medium maze configuration both fitness function optimization methods was able to produce agents able to solve the maze:
 
-* the Novelty Search based agent was able to solve maze in 10 from 10 trials
-* the Objective-Based agent was able to solve medium maze in 9 from 10 trials
+* the **Novelty Search** based agent was able to solve maze in 10 from 10 trials
+* the **Objective-Based** agent was able to solve medium maze in 9 from 10 trials
 
 The novelty search optimization also resulted in producing more energy efficient and elegant genome for solver agent. The
 absolute winner with NS optimization has only 15 neurons with 19 links between (Fitness: 0.984) compared to objective-based
-optimization where best agent has 60 neurons with 214 links between (Fitness: 0.987). The provided fitness value describe
+optimization where the best agent has 60 neurons with 214 links between (Fitness: 0.987). The provided fitness value describe
 how close final agent's position to the maze exit after 400 time steps (where 1.0 means exact match). Full statistics of
 experiment provided further.
 
@@ -457,7 +520,7 @@ We believe that novelty search optimization can be successfully applied to produ
 For more information about Novelty Search optimization please refer to original works:
 
 * [Novelty Search and the Problem with Objectives][4]
-* [EVOLUTION THROUGH THE SEARCH FOR NOVELTY][5]
+* [Evolution Through the Search for Novelty][5]
 
 ## Auxiliary Tools
 
@@ -475,14 +538,14 @@ cd $GOPATH/src/github.com/yaricom/goNEAT_NS
 python tools/genome_utils.py [in_file] --out [out_file]
 
 ```
-Where:
+**Where**:
 
-- **in_file** the input file to read genome data from, e.g [seed genome](data/mazestartgenes)
-- **out_file** the output file to write GraphML presentation
+- `in_file` the input file to read genome data from, e.g [seed genome](data/mazestartgenes)
+- `out_file` the output file to write GraphML presentation
 
 ### The agents' data records visualizer for maze solving simulations
 
-Allows to visualize recorded data of maze solving agents color coded by species they belong and separated into two groups:
+Allows visualizing recorded data of maze solving agents color coded by species they belong and separated into two groups:
 the best and other.
 
 Use following command to run it:
@@ -493,21 +556,21 @@ cd $GOPATH/src/github.com/yaricom/goNEAT_NS
 go run tools/maze_utils.go -records [records_file] -maze [maze_file] -out [out_file] -width [width] -height [height] -operation [operation]
 
 ```
-Where:
+**Where**:
 
-- **records_file** the file holding recorded data of maze solving by population agents
-- **maze_file** the maze configuration file, e.g. [medium_maze.txt](data/medium_maze.txt)
-- **out_file** the output file [PNG]
-- **width** the plot canvas width
-- **height** the plot canvas height
-- **operation** the name of drawing operation to perform [**draw_agents** or **draw_path**]
-  - **draw_agents** the drawing operation to render collected records of solver agents
-  - **draw_path** the operation to render path of successful maze solver through the maze
+- `records_file` the file holding recorded data of maze solving by population agents
+- `maze_file` the maze configuration file, e.g. [medium_maze.txt](data/medium_maze.txt)
+- `out_file` the output file [PNG]
+- `width` the plot canvas width
+- `height` the plot canvas height
+- `operation` the name of drawing operation to perform [**draw_agents** or **draw_path**]
+  - `draw_agents` the drawing operation to render collected records of solver agents
+  - `draw_path` the operation to render path of successful maze solver through the maze
 
 
 ## References:
 
-1. The original C++ NEAT implementation created by Kenneth O. Stanley, see: [NEAT][1]
+1. The original C++ NEAT implementation created by Kenneth O. Stanley, [NEAT Home Page][1]
 2. Other NEAT implementations can be found at [NEAT Software Catalog][2]
 3. Joel Lehman and Kenneth O. Stanley, [Novelty Search and the Problem with Objectives][4], Genetic Programming: Theory and Practice IX (GPTP 2011), New York, NY: Springer, 2011
 4. Joel Lehman, [Evolution through the search for novelty][5], B.S. Ohio State University, 2007
@@ -517,6 +580,8 @@ Where:
 8. Iaroslav Omelianenko, [The GoLang NEAT implementation][3], GitHub, 2018
 
 This source code maintained and managed by [Iaroslav Omelianenko][6]
+
+<a href="https://www.buymeacoffee.com/io42"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=io42&button_colour=be38f3&font_colour=ffffff&font_family=Comic&outline_colour=ffffff&coffee_colour=FFDD00"></a>
 
 [1]:http://www.cs.ucf.edu/~kstanley/neat.html
 [2]:http://eplex.cs.ucf.edu/neat_software/
