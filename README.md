@@ -17,7 +17,7 @@ research is to test this hypothesis.
 
 #### System Requirements
 
-The source code written and compiled against GO 1.9.x.
+The source code written and compiled against GO 1.15.x.
 
 ## Installation
 
