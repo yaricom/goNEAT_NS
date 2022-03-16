@@ -21,7 +21,7 @@ The source code written and compiled against GO 1.15.x.
 
 ## Installation
 
-Make sure that you have at least GO 1.9.x. environment installed onto your system and execute following command:
+Make sure that you have at least GO 1.15.x. environment installed onto your system and execute following command:
 ```bash
 
 go get -t github.com/yaricom/goNEAT_NS
