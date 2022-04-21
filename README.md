@@ -22,11 +22,11 @@ research is to test this hypothesis.
 
 ## Minimum Requirements
 
-The source code written and compiled against GO 1.15.x.
+The source code written and compiled against GO 1.17.x.
 
 ## Installation
 
-Make sure that you have at least GO 1.15.x. environment installed onto your system and execute following command:
+Make sure that you have at least GO 1.17.x. environment installed onto your system and execute following command:
 ```bash
 
 go get -t github.com/yaricom/goNEAT_NS/v2
