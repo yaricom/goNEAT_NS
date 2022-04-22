@@ -1,4 +1,4 @@
-# goNEAT-NS
+# goNEAT-NS 🇺🇦
 
 [![version](https://img.shields.io/github/v/tag/yaricom/goNEAT_NS.svg?sort=semver)](https://github.com/yaricom/goNEAT_NS/releases/latest)
 [![Build Status](https://travis-ci.org/yaricom/goNEAT_NS.svg?branch=master)](https://travis-ci.org/yaricom/goNEAT_NS) [![GoDoc](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns?status.svg)](https://godoc.org/github.com/yaricom/goNEAT_NS/neatns) [![Go version](https://img.shields.io/badge/go-1.15-blue.svg)](https://github.com/moovweb/gvm) [![license](https://img.shields.io/github/license/yaricom/goNEAT_NS.svg)](https://github.com/yaricom/goNEAT_NS/blob/master/LICENSE) [![yaricom/goNEAT](https://tokei.rs/b1/github/yaricom/goNEAT_NS?category=lines)](https://github.com/yaricom/goNEAT_NS)
