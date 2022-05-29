@@ -1,12 +1,13 @@
 package maze
 
 import (
+	"context"
 	"fmt"
-	"github.com/yaricom/goNEAT/v2/experiment"
-	"github.com/yaricom/goNEAT/v2/experiment/utils"
-	"github.com/yaricom/goNEAT/v2/neat"
-	"github.com/yaricom/goNEAT/v2/neat/genetics"
-	"github.com/yaricom/goNEAT_NS/v2/neatns"
+	"github.com/yaricom/goNEAT/v3/experiment"
+	"github.com/yaricom/goNEAT/v3/experiment/utils"
+	"github.com/yaricom/goNEAT/v3/neat"
+	"github.com/yaricom/goNEAT/v3/neat/genetics"
+	"github.com/yaricom/goNEAT_NS/v3/neatns"
 	"os"
 )
 
@@ -16,10 +17,10 @@ import (
 // will be automatically adjusted with compatAdjustFreq frequency, i.e., at each epoch % compatAdjustFreq == 0
 func NewMazeObjectiveEvaluator(out string, mazeEnv *Environment, numSpeciesTarget, compatAdjustFreq int) (experiment.GenerationEvaluator, experiment.TrialRunObserver) {
 	evaluator := &objectiveEvaluator{
-		OutputPath:       out,
-		MazeEnv:          mazeEnv,
-		NumSpeciesTarget: numSpeciesTarget,
-		CompatAdjustFreq: compatAdjustFreq,
+		outputPath:       out,
+		mazeEnv:          mazeEnv,
+		numSpeciesTarget: numSpeciesTarget,
+		compatAdjustFreq: compatAdjustFreq,
 	}
 	return evaluator, evaluator
 }
@@ -27,14 +28,14 @@ func NewMazeObjectiveEvaluator(out string, mazeEnv *Environment, numSpeciesTarge
 // objectiveEvaluator The maze solving experiment evaluator with objective fitness-based optimization of NEAT algorithm
 type objectiveEvaluator struct {
 	// The output path to store execution results
-	OutputPath string
+	outputPath string
 	// The maze seed environment
-	MazeEnv *Environment
+	mazeEnv *Environment
 
 	// The target number of species to be maintained
-	NumSpeciesTarget int
+	numSpeciesTarget int
 	// The species compatibility threshold adjustment frequency
-	CompatAdjustFreq int
+	compatAdjustFreq int
 }
 
 func (e objectiveEvaluator) TrialRunStarted(trial *experiment.Trial) {
@@ -55,19 +56,23 @@ func (e objectiveEvaluator) EpochEvaluated(_ *experiment.Trial, _ *experiment.Ge
 }
 
 // GenerationEvaluate evaluates one epoch for given population and prints results into output directory if any.
-func (e objectiveEvaluator) GenerationEvaluate(pop *genetics.Population, epoch *experiment.Generation, context *neat.Options) (err error) {
+func (e objectiveEvaluator) GenerationEvaluate(ctx context.Context, pop *genetics.Population, epoch *experiment.Generation) error {
+	options, ok := neat.FromContext(ctx)
+	if !ok {
+		return neat.ErrNEATOptionsNotFound
+	}
 	// Evaluate each organism on a test
 	for _, org := range pop.Organisms {
 		res, err := e.orgEvaluate(org, pop, epoch)
 		if err != nil {
 			return err
 		}
-		if res && (epoch.Best == nil || org.Fitness > epoch.Best.Fitness) {
+		if res && (epoch.Champion == nil || org.Fitness > epoch.Champion.Fitness) {
 			epoch.Solved = true
 			epoch.WinnerNodes = len(org.Genotype.Nodes)
 			epoch.WinnerGenes = org.Genotype.Extrons()
 			epoch.WinnerEvals = trialSim.individualsCounter
-			epoch.Best = org
+			epoch.Champion = org
 		}
 	}
 
@@ -75,8 +80,8 @@ func (e objectiveEvaluator) GenerationEvaluate(pop *genetics.Population, epoch *
 	epoch.FillPopulationStatistics(pop)
 
 	// Only print to file every print_every generation
-	if epoch.Solved || epoch.Id%context.PrintEvery == 0 || epoch.Id == context.NumGenerations-1 {
-		if _, err = utils.WritePopulationPlain(e.OutputPath, pop, epoch); err != nil {
+	if epoch.Solved || epoch.Id%options.PrintEvery == 0 || epoch.Id == options.NumGenerations-1 {
+		if _, err := utils.WritePopulationPlain(e.outputPath, pop, epoch); err != nil {
 			neat.ErrorLog(fmt.Sprintf("Failed to dump population, reason: %s\n", err))
 			return err
 		}
@@ -84,53 +89,42 @@ func (e objectiveEvaluator) GenerationEvaluate(pop *genetics.Population, epoch *
 
 	if epoch.Solved {
 		// print winner organism
-		org := epoch.Best
+		org := epoch.Champion
 		if depth, err := org.Phenotype.MaxActivationDepthFast(0); err == nil {
 			neat.InfoLog(fmt.Sprintf("Activation depth of the winner: %d\n", depth))
 		}
 
 		genomeFile := "maze_obj_winner"
 		// Prints the winner organism to file!
-		if orgPath, err := utils.WriteGenomePlain(genomeFile, e.OutputPath, org, epoch); err != nil {
+		if orgPath, err := utils.WriteGenomePlain(genomeFile, e.outputPath, org, epoch); err != nil {
 			neat.ErrorLog(fmt.Sprintf("Failed to dump winner organism's genome, reason: %s\n", err))
 		} else {
 			neat.InfoLog(fmt.Sprintf("Generation #%d winner's genome dumped to: %s\n", epoch.Id, orgPath))
 		}
 
 		// Prints the winner organism's Phenotype to the Cytoscape JSON file!
-		if orgPath, err := utils.WriteGenomeCytoscapeJSON(genomeFile, e.OutputPath, org, epoch); err != nil {
+		if orgPath, err := utils.WriteGenomeCytoscapeJSON(genomeFile, e.outputPath, org, epoch); err != nil {
 			neat.ErrorLog(fmt.Sprintf("Failed to dump winner organism's phenome Cytoscape JSON graph, reason: %s\n", err))
 		} else {
 			neat.InfoLog(fmt.Sprintf("Generation #%d winner's phenome Cytoscape JSON graph dumped to: %s\n",
 				epoch.Id, orgPath))
 		}
-	} else if epoch.Id < context.NumGenerations-1 {
+	} else if epoch.Id < options.NumGenerations-1 {
 		speciesCount := len(pop.Species)
 
 		// adjust species count by keeping it constant
-		if epoch.Id%e.CompatAdjustFreq == 0 {
-			if speciesCount < e.NumSpeciesTarget {
-				context.CompatThreshold -= 0.1
-			} else if speciesCount > e.NumSpeciesTarget {
-				context.CompatThreshold += 0.1
-			}
-
-			// to avoid dropping too low
-			if context.CompatThreshold < 0.3 {
-				context.CompatThreshold = 0.3
-			}
-		}
+		adjustSpeciesNumber(speciesCount, epoch.Id, e.compatAdjustFreq, e.numSpeciesTarget, options)
 
 		neat.InfoLog(fmt.Sprintf("%d species -> %d organisms [compatibility threshold: %.1f, target: %d]\n",
-			speciesCount, len(pop.Organisms), context.CompatThreshold, e.NumSpeciesTarget))
+			speciesCount, len(pop.Organisms), options.CompatThreshold, e.numSpeciesTarget))
 	}
 
-	return err
+	return nil
 }
 
 func (e *objectiveEvaluator) storeRecorded() {
 	// store recorded agents' performance
-	recPath := fmt.Sprintf("%s/record.dat", utils.CreateOutDirForTrial(e.OutputPath, trialSim.trialID))
+	recPath := fmt.Sprintf("%s/record.dat", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
 	recFile, err := os.Create(recPath)
 	if err == nil {
 		err = trialSim.records.Write(recFile)
@@ -140,7 +134,7 @@ func (e *objectiveEvaluator) storeRecorded() {
 	}
 
 	// print novelty points with maximal fitness
-	npPath := fmt.Sprintf("%s/fittest_archive_points.txt", utils.CreateOutDirForTrial(e.OutputPath, trialSim.trialID))
+	npPath := fmt.Sprintf("%s/fittest_archive_points.txt", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
 	npFile, err := os.Create(npPath)
 	if err == nil {
 		err = trialSim.archive.PrintFittest(npFile)
@@ -158,7 +152,7 @@ func (e *objectiveEvaluator) orgEvaluate(org *genetics.Organism, _ *genetics.Pop
 	record.SpeciesAge = org.Species.Age
 
 	// evaluate individual organism and get novelty point holding simulation results
-	nItem, solved, err := mazeSimulationEvaluate(e.MazeEnv, org, &record, nil)
+	nItem, solved, err := mazeSimulationEvaluate(e.mazeEnv, org, &record, nil)
 	if err != nil {
 		if err == ErrOutputIsNaN {
 			// corrupted genome, but OK to continue evolutionary process
@@ -174,8 +168,8 @@ func (e *objectiveEvaluator) orgEvaluate(org *genetics.Organism, _ *genetics.Pop
 
 	if solved {
 		// run simulation to store solver path
-		pathPoints := make([]Point, e.MazeEnv.TimeSteps)
-		_, _, err := mazeSimulationEvaluate(e.MazeEnv, org, &record, pathPoints)
+		pathPoints := make([]Point, e.mazeEnv.TimeSteps)
+		_, _, err := mazeSimulationEvaluate(e.mazeEnv, org, &record, pathPoints)
 		if err != nil {
 			neat.ErrorLog("Solver's path simulation failed\n")
 			return false, err
