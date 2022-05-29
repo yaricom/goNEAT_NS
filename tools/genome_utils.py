@@ -17,7 +17,7 @@ import network as n
 
 def readGenome(path):
     """
-    Reads genome from specified path and retruns it as a network of nodes and links.
+    Reads genome from specified path and return it as a network of nodes and links.
     """
     net = n.Network()
     with open(path, 'r') as lines:
