@@ -11,6 +11,11 @@ import (
 	"math"
 )
 
+const (
+	compatibilityThresholdStep     = 0.1
+	compatibilityThresholdMinValue = 0.3
+)
+
 // The simulation results for one trial
 var trialSim mazeSimResults
 
@@ -175,14 +180,14 @@ func mazeSimulationStep(env *Environment, org *genetics.Organism, netDepth int) 
 func adjustSpeciesNumber(speciesCount, epochId, adjustFrequency, numberSpeciesTarget int, options *neat.Options) {
 	if epochId%adjustFrequency == 0 {
 		if speciesCount < numberSpeciesTarget {
-			options.CompatThreshold -= 0.1
+			options.CompatThreshold -= compatibilityThresholdStep
 		} else if speciesCount > numberSpeciesTarget {
-			options.CompatThreshold += 0.1
+			options.CompatThreshold += compatibilityThresholdStep
 		}
 
 		// to avoid dropping too low
-		if options.CompatThreshold < 0.3 {
-			options.CompatThreshold = 0.3
+		if options.CompatThreshold < compatibilityThresholdMinValue {
+			options.CompatThreshold = compatibilityThresholdMinValue
 		}
 	}
 }
