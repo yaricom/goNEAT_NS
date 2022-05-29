@@ -159,20 +159,20 @@ func (e *noveltySearchEvaluator) storeRecorded() {
 	}
 
 	// print collected novelty points from archive
-	npPath := fmt.Sprintf("%s/novelty_archive_points.txt", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
+	npPath := fmt.Sprintf("%s/novelty_archive_points.json", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
 	npFile, err := os.Create(npPath)
 	if err == nil {
-		err = trialSim.archive.PrintNoveltyPoints(npFile)
+		err = trialSim.archive.DumpNoveltyPoints(npFile)
 	}
 	if err != nil {
 		neat.ErrorLog(fmt.Sprintf("Failed to print novelty points from archive, reason: %s\n", err))
 	}
 
 	// print novelty points with maximal fitness
-	npPath = fmt.Sprintf("%s/fittest_novelty_archive_points.txt", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
+	npPath = fmt.Sprintf("%s/fittest_novelty_archive_points.json", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
 	npFile, err = os.Create(npPath)
 	if err == nil {
-		err = trialSim.archive.PrintFittest(npFile)
+		err = trialSim.archive.DumpFittest(npFile)
 	}
 	if err != nil {
 		neat.ErrorLog(fmt.Sprintf("Failed to print fittest novelty points from archive, reason: %s\n", err))

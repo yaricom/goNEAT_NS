@@ -134,10 +134,10 @@ func (e *objectiveEvaluator) storeRecorded() {
 	}
 
 	// print novelty points with maximal fitness
-	npPath := fmt.Sprintf("%s/fittest_archive_points.txt", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
+	npPath := fmt.Sprintf("%s/fittest_archive_points.json", utils.CreateOutDirForTrial(e.outputPath, trialSim.trialID))
 	npFile, err := os.Create(npPath)
 	if err == nil {
-		err = trialSim.archive.PrintFittest(npFile)
+		err = trialSim.archive.DumpFittest(npFile)
 	}
 	if err != nil {
 		neat.ErrorLog(fmt.Sprintf("Failed to print fittest  points from archive, reason: %s\n", err))

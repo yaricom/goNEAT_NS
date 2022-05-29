@@ -1,35 +1,32 @@
 package neatns
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 )
 
-// PrintNoveltyPoints prints collected novelty points to provided writer
-func (a *NoveltyArchive) PrintNoveltyPoints(w io.Writer) error {
+// DumpNoveltyPoints dumps collected novelty points to the provided writer as JSON
+func (a *NoveltyArchive) DumpNoveltyPoints(w io.Writer) error {
 	if len(a.NovelItems) == 0 {
 		return errors.New("no novel items to print")
 	}
-	for _, p := range a.NovelItems {
-		str := p.String()
-		if _, err := fmt.Fprintln(w, str); err != nil {
-			return err
-		}
-	}
-	return nil
+	return printNovelItems(a.NovelItems, w)
 }
 
-// PrintFittest prints collected individuals with maximal fitness
-func (a *NoveltyArchive) PrintFittest(w io.Writer) error {
+// DumpFittest dumps collected novelty points of individuals with maximal fitness found during evolution
+func (a *NoveltyArchive) DumpFittest(w io.Writer) error {
 	if len(a.FittestItems) == 0 {
 		return errors.New("no fittest items to print")
 	}
-	for _, f := range a.FittestItems {
-		str := f.String()
-		if _, err := fmt.Fprintln(w, str); err != nil {
-			return err
-		}
+	return printNovelItems(a.FittestItems, w)
+}
+
+func printNovelItems(items []*NoveltyItem, w io.Writer) error {
+	if data, err := json.Marshal(items); err != nil {
+		return err
+	} else if _, err = w.Write(data); err != nil {
+		return err
 	}
 	return nil
 }

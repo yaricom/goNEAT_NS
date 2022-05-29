@@ -12,12 +12,12 @@ import (
 // Using a novelty metric we can determine how novel a new item is compared to everything
 // currently in the novelty set
 type NoveltyArchive struct {
-	// the all the novel items we have found so far
+	// NovelItems all the novel items we have found so far
 	NovelItems []*NoveltyItem
-	// the all novel items with the fittest organisms associated found so far
+	// FittestItems all novel items from the fittest organisms found so far
 	FittestItems NoveltyItemsByFitness
 
-	// the current generation
+	// Generation the current generation
 	Generation int
 
 	// the measure of novelty

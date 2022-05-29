@@ -9,20 +9,20 @@ type NoveltyItem struct {
 	// The flag to indicate whether item was added to archive
 	added bool
 	// The generation when item was added to archive
-	Generation int
+	Generation int `json:"generation"`
 
 	// The ID of associated individual organism */
-	IndividualID int
+	IndividualID int `json:"individual_id"`
 
 	// The fitness of the associated organism
-	Fitness float64
+	Fitness float64 `json:"fitness"`
 	// The novelty of this item
-	Novelty float64
+	Novelty float64 `json:"novelty"`
 	// The item's age
-	Age float64
+	Age float64 `json:"age"`
 
 	// The data associated with item
-	Data []float64
+	Data []float64 `json:"data"`
 }
 
 // NewNoveltyItem creates new novelty item
@@ -32,13 +32,12 @@ func NewNoveltyItem() *NoveltyItem {
 
 // Stringer
 func (ni NoveltyItem) String() string {
-	str := fmt.Sprintf("/* Novelty: %.2f Fitness: %f Generation: %d Individual: %d\n",
+	str := fmt.Sprintf("Novelty: %.2f Fitness: %f Generation: %d Individual: %d\n",
 		ni.Novelty, ni.Fitness, ni.Generation, ni.IndividualID)
 	str += "\tPoint: "
 	for _, v := range ni.Data {
 		str += fmt.Sprintf(" %.3f", v)
 	}
-	str += " */"
 	return str
 }
 
