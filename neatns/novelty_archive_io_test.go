@@ -31,6 +31,14 @@ func TestNoveltyArchive_PrintFittest(t *testing.T) {
 	assertItemsEqual(archive.FittestItems, novelItems, t)
 }
 
+func TestNoveltyArchive_PrintFittest_no_points(t *testing.T) {
+	archive := NewNoveltyArchive(0.1, squareMetric, DefaultNoveltyArchiveOptions())
+
+	var buf bytes.Buffer
+	err := archive.DumpFittest(&buf)
+	assert.Error(t, err, ErrNoFittestItems.Error())
+}
+
 func TestNoveltyArchive_PrintNoveltyPoints(t *testing.T) {
 	pop, err := createRandomPopulation(3, 2, 5, 0.5)
 	require.NoError(t, err, "failed to create population")
@@ -49,6 +57,14 @@ func TestNoveltyArchive_PrintNoveltyPoints(t *testing.T) {
 	err = json.Unmarshal(buf.Bytes(), &novelItems)
 
 	assertItemsEqual(archive.NovelItems, novelItems, t)
+}
+
+func TestNoveltyArchive_PrintNoveltyPoints_no_points(t *testing.T) {
+	archive := NewNoveltyArchive(0.1, squareMetric, DefaultNoveltyArchiveOptions())
+
+	var buf bytes.Buffer
+	err := archive.DumpNoveltyPoints(&buf)
+	assert.Error(t, err, ErrNoNovelItems.Error())
 }
 
 func assertItemsEqual(expected, actual []*NoveltyItem, t *testing.T) {
