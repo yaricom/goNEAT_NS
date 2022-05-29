@@ -2,13 +2,11 @@ package neatns
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
-
-const fittestStr = "/* Novelty: 0.29 Fitness: 0.100000 Generation: 2 Individual: 0\n\tPoint:  0.100 */\n"
-const novPointsStr = "/* Novelty: 0.00 Fitness: 0.100000 Generation: 2 Individual: 0\n\tPoint:  0.100 */\n/* Novelty: 0.16 Fitness: 0.500000 Generation: 2 Individual: 0\n\tPoint:  0.100 */\n/* Novelty: 0.16 Fitness: 0.900000 Generation: 2 Individual: 0\n\tPoint:  0.100 */\n"
 
 func TestNoveltyArchive_PrintFittest(t *testing.T) {
 	pop, err := createRandomPopulation(3, 2, 5, 0.5)
@@ -23,10 +21,23 @@ func TestNoveltyArchive_PrintFittest(t *testing.T) {
 	require.NoError(t, err)
 
 	var buf bytes.Buffer
-	err = archive.PrintFittest(&buf)
+	err = archive.DumpFittest(&buf)
 	require.NoError(t, err)
-	assert.Equal(t, fittestStr, buf.String())
-	t.Logf(buf.String())
+
+	// decode and check
+	var novelItems []*NoveltyItem
+	err = json.Unmarshal(buf.Bytes(), &novelItems)
+	require.NoError(t, err, "failed to unmarshal")
+
+	assertItemsEqual(archive.FittestItems, novelItems, t)
+}
+
+func TestNoveltyArchive_PrintFittest_no_points(t *testing.T) {
+	archive := NewNoveltyArchive(0.1, squareMetric, DefaultNoveltyArchiveOptions())
+
+	var buf bytes.Buffer
+	err := archive.DumpFittest(&buf)
+	assert.Error(t, err, ErrNoFittestItems.Error())
 }
 
 func TestNoveltyArchive_PrintNoveltyPoints(t *testing.T) {
@@ -39,8 +50,33 @@ func TestNoveltyArchive_PrintNoveltyPoints(t *testing.T) {
 
 	archive.EvaluatePopulationNovelty(pop, false)
 	var buf bytes.Buffer
-	err = archive.PrintNoveltyPoints(&buf)
+	err = archive.DumpNoveltyPoints(&buf)
 	require.NoError(t, err)
-	assert.Equal(t, novPointsStr, buf.String())
-	t.Logf(buf.String())
+
+	// decode and check
+	var novelItems []*NoveltyItem
+	err = json.Unmarshal(buf.Bytes(), &novelItems)
+	require.NoError(t, err, "failed to unmarshal")
+
+	assertItemsEqual(archive.NovelItems, novelItems, t)
+}
+
+func TestNoveltyArchive_PrintNoveltyPoints_no_points(t *testing.T) {
+	archive := NewNoveltyArchive(0.1, squareMetric, DefaultNoveltyArchiveOptions())
+
+	var buf bytes.Buffer
+	err := archive.DumpNoveltyPoints(&buf)
+	assert.Error(t, err, ErrNoNovelItems.Error())
+}
+
+func assertItemsEqual(expected, actual []*NoveltyItem, t *testing.T) {
+	require.Equal(t, len(expected), len(actual))
+	for i, ni := range expected {
+		assert.Equal(t, ni.Age, actual[i].Age)
+		assert.Equal(t, ni.Novelty, actual[i].Novelty)
+		assert.Equal(t, ni.Fitness, actual[i].Fitness)
+		assert.Equal(t, ni.Generation, actual[i].Generation)
+		assert.Equal(t, ni.IndividualID, actual[i].IndividualID)
+		assert.EqualValues(t, ni.Data, actual[i].Data)
+	}
 }
