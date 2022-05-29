@@ -43,3 +43,11 @@ func TestCommon_adjustSpeciesNumber(t *testing.T) {
 	adjustSpeciesNumber(speciesCount, epochID, adjustFrequency, numberSpeciesTarget, options)
 	assert.Equal(t, compatibilityThresholdMinValue, options.CompatThreshold)
 }
+
+func TestCommon_histDiff(t *testing.T) {
+	left := []float64{1.0, 2.0, 3.0, 4.0}
+	right := []float64{4.0, 3.0, 2.0, 1.0}
+	diff := histDiff(left, right)
+	// (3 + 1 + 1 + 3) / 4 = 2
+	assert.EqualValues(t, 2, diff)
+}
