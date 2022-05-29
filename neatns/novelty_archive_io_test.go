@@ -27,6 +27,7 @@ func TestNoveltyArchive_PrintFittest(t *testing.T) {
 	// decode and check
 	var novelItems []*NoveltyItem
 	err = json.Unmarshal(buf.Bytes(), &novelItems)
+	require.NoError(t, err, "failed to unmarshal")
 
 	assertItemsEqual(archive.FittestItems, novelItems, t)
 }
@@ -55,6 +56,7 @@ func TestNoveltyArchive_PrintNoveltyPoints(t *testing.T) {
 	// decode and check
 	var novelItems []*NoveltyItem
 	err = json.Unmarshal(buf.Bytes(), &novelItems)
+	require.NoError(t, err, "failed to unmarshal")
 
 	assertItemsEqual(archive.NovelItems, novelItems, t)
 }
