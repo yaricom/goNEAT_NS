@@ -4,15 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/yaricom/goNEAT/v2/experiment"
-	"github.com/yaricom/goNEAT/v2/neat"
-	"github.com/yaricom/goNEAT/v2/neat/genetics"
-	"github.com/yaricom/goNEAT_NS/v2/examples/maze"
+	"github.com/yaricom/goNEAT/v3/experiment"
+	"github.com/yaricom/goNEAT/v3/neat"
+	"github.com/yaricom/goNEAT/v3/neat/genetics"
+	"github.com/yaricom/goNEAT_NS/v3/examples/maze"
 	"log"
 	"math/rand"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 )
@@ -39,33 +38,21 @@ func main() {
 	seed := time.Now().Unix()
 	rand.Seed(seed)
 
-	// Load context configuration
-	configFile, err := os.Open(*contextPath)
-	if err != nil {
-		log.Fatal("Failed to open context configuration file: ", err)
-	}
-	neatOptions, err := neat.LoadNeatOptions(configFile)
+	// Load NEAT options
+	neatOptions, err := neat.ReadNeatOptionsFromFile(*contextPath)
 	if err != nil {
 		log.Fatal("Failed to load NEAT options: ", err)
 	}
 
 	// Load Genome
-	log.Printf("Loading start genome for %s experiment\n", *experimentName)
-	genomeFile, err := os.Open(*genomePath)
+	log.Printf("Loading start genome for %s experiment from file '%s'\n", *experimentName, *genomePath)
+	reader, err := genetics.NewGenomeReaderFromFile(*genomePath)
 	if err != nil {
-		log.Fatal("Failed to open genome file: ", err)
+		log.Fatalf("Failed to open genome file, reason: '%s'", err)
 	}
-	encoding := genetics.PlainGenomeEncoding
-	if strings.HasSuffix(*genomePath, ".yml") {
-		encoding = genetics.YAMLGenomeEncoding
-	}
-	decoder, err := genetics.NewGenomeReader(genomeFile, encoding)
+	startGenome, err := reader.Read()
 	if err != nil {
-		log.Fatal("Failed to create genome decoder: ", err)
-	}
-	startGenome, err := decoder.Read()
-	if err != nil {
-		log.Fatal("Failed to read start genome: ", err)
+		log.Fatalf("Failed to read start genome, reason: '%s'", err)
 	}
 	fmt.Println(startGenome)
 

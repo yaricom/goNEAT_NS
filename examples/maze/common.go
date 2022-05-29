@@ -4,10 +4,10 @@ package maze
 
 import (
 	"fmt"
-	"github.com/yaricom/goNEAT/v2/neat"
-	"github.com/yaricom/goNEAT/v2/neat/genetics"
-	"github.com/yaricom/goNEAT/v2/neat/network"
-	"github.com/yaricom/goNEAT_NS/v2/neatns"
+	"github.com/yaricom/goNEAT/v3/neat"
+	"github.com/yaricom/goNEAT/v3/neat/genetics"
+	"github.com/yaricom/goNEAT/v3/neat/network"
+	"github.com/yaricom/goNEAT_NS/v3/neatns"
 	"math"
 )
 
@@ -169,4 +169,20 @@ func mazeSimulationStep(env *Environment, org *genetics.Organism, netDepth int) 
 	}
 
 	return nil
+}
+
+// adjustSpeciesNumber is to adjust species count by keeping it constant
+func adjustSpeciesNumber(speciesCount, epochId, adjustFrequency, numberSpeciesTarget int, options *neat.Options) {
+	if epochId%adjustFrequency == 0 {
+		if speciesCount < numberSpeciesTarget {
+			options.CompatThreshold -= 0.1
+		} else if speciesCount > numberSpeciesTarget {
+			options.CompatThreshold += 0.1
+		}
+
+		// to avoid dropping too low
+		if options.CompatThreshold < 0.3 {
+			options.CompatThreshold = 0.3
+		}
+	}
 }

@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/fogleman/gg"
-	"github.com/yaricom/goNEAT_NS/v2/examples/maze"
+	"github.com/yaricom/goNEAT_NS/v3/examples/maze"
 	"image"
 	"image/color"
 	"io"
@@ -60,10 +60,10 @@ func plotAgentsRecordsByAge(records *maze.RecordStore, dc *gg.Context) {
 }
 
 func plotAgentsRecordsBySpecies(records *maze.RecordStore, env *maze.Environment, bestThreshold float64, dc *gg.Context) {
-	maxId := 0
+	maxID := 0
 	for _, r := range records.Records {
-		if r.SpeciesID > maxId {
-			maxId = r.SpeciesID
+		if r.SpeciesID > maxID {
+			maxID = r.SpeciesID
 		}
 	}
 
@@ -72,9 +72,9 @@ func plotAgentsRecordsBySpecies(records *maze.RecordStore, env *maze.Environment
 
 	// generate color palette and find the best species (moved at least 2/3 fom start to exit)
 	numSpecies, numBestSpecies := 0, 0
-	colors := make([]color.Color, maxId+1)
-	spIdx := make([]int, maxId+1)
-	bestSpIdx := make([]int, maxId+1)
+	colors := make([]color.Color, maxID+1)
+	spIdx := make([]int, maxID+1)
+	bestSpIdx := make([]int, maxID+1)
 	for _, rec := range records.Records {
 		if spIdx[rec.SpeciesID] == 0 {
 			spIdx[rec.SpeciesID] = 1
@@ -179,9 +179,9 @@ func drawMaze(maze *maze.Environment, dc *gg.Context) image.Rectangle {
 	return image.Rect(int(minX), int(minY), int(maxX), int(maxY))
 }
 
-func plotSpecies(records *maze.RecordStore, dc *gg.Context, speciesId int, colors []color.Color) {
+func plotSpecies(records *maze.RecordStore, dc *gg.Context, speciesID int, colors []color.Color) {
 	for _, r := range records.Records {
-		if r.SpeciesID == speciesId {
+		if r.SpeciesID == speciesID {
 			dc.DrawCircle(r.X, r.Y, 2.0)
 			dc.SetColor(colors[r.SpeciesID])
 			dc.Fill()
