@@ -1,6 +1,6 @@
 module github.com/yaricom/goNEAT_NS/v4
 
-go 1.18
+go 1.21
 
 require (
 	github.com/fogleman/gg v1.3.0
