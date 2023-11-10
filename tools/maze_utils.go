@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/fogleman/gg"
-	"github.com/yaricom/goNEAT_NS/v3/examples/maze"
+	"github.com/yaricom/goNEAT_NS/v4/examples/maze"
 	"image"
 	"image/color"
 	"io"

@@ -4,10 +4,11 @@ package maze
 
 import (
 	"fmt"
-	"github.com/yaricom/goNEAT/v3/neat"
-	"github.com/yaricom/goNEAT/v3/neat/genetics"
-	"github.com/yaricom/goNEAT/v3/neat/network"
-	"github.com/yaricom/goNEAT_NS/v3/neatns"
+	"github.com/pkg/errors"
+	"github.com/yaricom/goNEAT/v4/neat"
+	"github.com/yaricom/goNEAT/v4/neat/genetics"
+	"github.com/yaricom/goNEAT/v4/neat/network"
+	"github.com/yaricom/goNEAT_NS/v4/neatns"
 	"math"
 )
 
@@ -49,7 +50,11 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 	nItem := neatns.NewNoveltyItem()
 
 	// get Organism phenotype's network depth
-	netDepth, err := org.Phenotype.MaxActivationDepthFast(1) // The max depth of the network to be activated
+	phenotype, err := org.Phenotype()
+	if err != nil {
+		return nil, false, err
+	}
+	netDepth, err := phenotype.MaxActivationDepthWithCap(1) // The max depth of the network to be activated
 	if err != nil {
 		neat.DebugLog(fmt.Sprintf(
 			"Failed to estimate maximal depth of the network. Using default depth: %d", netDepth))
@@ -62,7 +67,7 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 
 	// initialize maze simulation's environment specific to the provided organism - this will be a copy
 	// of primordial environment provided
-	orgEnv, err := mazeSimulationInit(*env, org, netDepth)
+	orgEnv, err := mazeSimulationInit(*env, phenotype, netDepth)
 	if err != nil {
 		return nil, false, err
 	}
@@ -70,7 +75,7 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 	// do a specified amount of time steps emulations or while exit not found
 	steps := 0
 	for i := 0; i < orgEnv.TimeSteps && !orgEnv.ExitFound; i++ {
-		if err = mazeSimulationStep(orgEnv, org, netDepth); err != nil {
+		if err = mazeSimulationStep(orgEnv, phenotype, netDepth); err != nil {
 			return nil, false, err
 		}
 		// store agent path points at given sample size
@@ -117,9 +122,9 @@ func mazeSimulationEvaluate(env *Environment, org *genetics.Organism, record *Ag
 
 // To initialize the maze simulation within provided environment copy and for given organism.
 // Returns new environment for simulation against given organism
-func mazeSimulationInit(env Environment, org *genetics.Organism, netDepth int) (*Environment, error) {
+func mazeSimulationInit(env Environment, phenotype *network.Network, netDepth int) (*Environment, error) {
 	// flush the neural net
-	if _, err := org.Phenotype.Flush(); err != nil {
+	if _, err := phenotype.Flush(); err != nil {
 		neat.ErrorLog("Failed to flush phenotype")
 		return nil, err
 	}
@@ -132,14 +137,14 @@ func mazeSimulationInit(env Environment, org *genetics.Organism, netDepth int) (
 	// create neural net inputs from environment
 	if inputs, err := env.GetInputs(); err != nil {
 		return nil, err
-	} else if err = org.Phenotype.LoadSensors(inputs); err != nil { // load into neural net
+	} else if err = phenotype.LoadSensors(inputs); err != nil { // load into neural net
 		return nil, err
 	}
 
 	// propagate input through the phenotype net
 
 	// Use depth to ensure full relaxation
-	if _, err := org.Phenotype.ForwardSteps(netDepth); err != nil && err != network.ErrNetExceededMaxActivationAttempts {
+	if _, err := phenotype.ForwardSteps(netDepth); err != nil && !errors.Is(err, network.ErrNetExceededMaxActivationAttempts) {
 		neat.ErrorLog(fmt.Sprintf("Failed to activate network at simulation init: %s", err))
 		return nil, err
 	}
@@ -148,21 +153,21 @@ func mazeSimulationInit(env Environment, org *genetics.Organism, netDepth int) (
 }
 
 // To execute a time step of the maze simulation evaluation within given Environment for provided Organism
-func mazeSimulationStep(env *Environment, org *genetics.Organism, netDepth int) error {
+func mazeSimulationStep(env *Environment, phenotype *network.Network, netDepth int) error {
 	// get simulation parameters as inputs to organism's network
 	if inputs, err := env.GetInputs(); err != nil {
 		return err
-	} else if err = org.Phenotype.LoadSensors(inputs); err != nil {
+	} else if err = phenotype.LoadSensors(inputs); err != nil {
 		neat.ErrorLog("Failed to load sensors")
 		return err
 	}
-	if _, err := org.Phenotype.ForwardSteps(netDepth); err != nil && err != network.ErrNetExceededMaxActivationAttempts {
+	if _, err := phenotype.ForwardSteps(netDepth); err != nil && !errors.Is(err, network.ErrNetExceededMaxActivationAttempts) {
 		neat.ErrorLog(fmt.Sprintf("Failed to activate network at simulation init: %s", err))
 		return err
 	}
 
 	// use the net's outputs to change heading and velocity of maze agent
-	if err := env.ApplyOutputs(org.Phenotype.Outputs[0].Activation, org.Phenotype.Outputs[1].Activation); err != nil {
+	if err := env.ApplyOutputs(phenotype.Outputs[0].Activation, phenotype.Outputs[1].Activation); err != nil {
 		neat.ErrorLog("Failed to apply outputs")
 		return err
 	}
