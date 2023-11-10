@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/yaricom/goNEAT/v4/neat"
 	"github.com/yaricom/goNEAT/v4/neat/genetics"
+	"github.com/yaricom/goNEAT/v4/neat/math"
 	"math/rand"
 	"strings"
 	"testing"
@@ -133,6 +134,7 @@ func createRandomPopulation(in, out, maxHidden int, linkProb float64) (*genetics
 	conf := &neat.Options{
 		CompatThreshold: 0.5,
 		PopSize:         10,
+		NodeActivators:  []math.NodeActivationType{math.SigmoidSteepenedActivation},
 	}
 	pop, err := genetics.NewPopulationRandom(in, out, maxHidden, false, linkProb, conf)
 	if err != nil {
