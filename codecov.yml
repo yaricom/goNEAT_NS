@@ -1,0 +1,4 @@
+# Ignore maze runners
+ignore:
+  - "examples/maze/maze_ns.go"
+  - "examples/maze/maze_obj.go"
