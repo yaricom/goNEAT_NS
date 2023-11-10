@@ -3,11 +3,12 @@ package maze
 import (
 	"context"
 	"fmt"
-	"github.com/yaricom/goNEAT/v3/experiment"
-	"github.com/yaricom/goNEAT/v3/experiment/utils"
-	"github.com/yaricom/goNEAT/v3/neat"
-	"github.com/yaricom/goNEAT/v3/neat/genetics"
-	"github.com/yaricom/goNEAT_NS/v3/neatns"
+	"github.com/pkg/errors"
+	"github.com/yaricom/goNEAT/v4/experiment"
+	"github.com/yaricom/goNEAT/v4/experiment/utils"
+	"github.com/yaricom/goNEAT/v4/neat"
+	"github.com/yaricom/goNEAT/v4/neat/genetics"
+	"github.com/yaricom/goNEAT_NS/v4/neatns"
 	"os"
 )
 
@@ -38,7 +39,7 @@ type objectiveEvaluator struct {
 	compatAdjustFreq int
 }
 
-func (e objectiveEvaluator) TrialRunStarted(trial *experiment.Trial) {
+func (e *objectiveEvaluator) TrialRunStarted(trial *experiment.Trial) {
 	trialSim = mazeSimResults{
 		trialID: trial.Id,
 		records: new(RecordStore),
@@ -46,17 +47,17 @@ func (e objectiveEvaluator) TrialRunStarted(trial *experiment.Trial) {
 	}
 }
 
-func (e objectiveEvaluator) TrialRunFinished(_ *experiment.Trial) {
+func (e *objectiveEvaluator) TrialRunFinished(_ *experiment.Trial) {
 	// the last epoch executed
 	e.storeRecorded()
 }
 
-func (e objectiveEvaluator) EpochEvaluated(_ *experiment.Trial, _ *experiment.Generation) {
+func (e *objectiveEvaluator) EpochEvaluated(_ *experiment.Trial, _ *experiment.Generation) {
 	// just stub
 }
 
 // GenerationEvaluate evaluates one epoch for given population and prints results into output directory if any.
-func (e objectiveEvaluator) GenerationEvaluate(ctx context.Context, pop *genetics.Population, epoch *experiment.Generation) error {
+func (e *objectiveEvaluator) GenerationEvaluate(ctx context.Context, pop *genetics.Population, epoch *experiment.Generation) error {
 	options, ok := neat.FromContext(ctx)
 	if !ok {
 		return neat.ErrNEATOptionsNotFound
@@ -90,9 +91,7 @@ func (e objectiveEvaluator) GenerationEvaluate(ctx context.Context, pop *genetic
 	if epoch.Solved {
 		// print winner organism
 		org := epoch.Champion
-		if depth, err := org.Phenotype.MaxActivationDepthFast(0); err == nil {
-			neat.InfoLog(fmt.Sprintf("Activation depth of the winner: %d\n", depth))
-		}
+		utils.PrintActivationDepth(org, true)
 
 		genomeFile := "maze_obj_winner"
 		// Prints the winner organism to file!
@@ -154,7 +153,7 @@ func (e *objectiveEvaluator) orgEvaluate(org *genetics.Organism, _ *genetics.Pop
 	// evaluate individual organism and get novelty point holding simulation results
 	nItem, solved, err := mazeSimulationEvaluate(e.mazeEnv, org, &record, nil)
 	if err != nil {
-		if err == ErrOutputIsNaN {
+		if errors.Is(err, ErrOutputIsNaN) {
 			// corrupted genome, but OK to continue evolutionary process
 			return false, nil
 		}
