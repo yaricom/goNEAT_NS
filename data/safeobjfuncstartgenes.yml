@@ -1,0 +1,27 @@
+# The objective function candidate start genome
+genome:
+  id: 1
+  # The traits used in this genome
+  traits:
+    - {id: 1,  params: [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
+
+  # The neuron nodes list for this genome
+  nodes:
+    - {id: 1,  trait_id: 0, type: BIAS, activation: LinearActivation}
+    # The input sensors
+    - { id: 2,  trait_id: 0, type: INPT, activation: LinearActivation }
+    # The non-linear hidden control node
+    - { id: 3,  trait_id: 0, type: HIDN, activation: SigmoidSteepenedActivation }
+    # The output nodes
+    # The a coefficient
+    - { id: 4,  trait_id: 0, type: OUTP, activation: LinearActivation }
+    # The b coefficient
+    - { id: 5,  trait_id: 0, type: OUTP, activation: LinearActivation }
+
+  # The connection genes
+  genes:
+    - {src_id: 1,  tgt_id: 3,  weight: 0.0, trait_id: 1, innov_num: 1,  mut_num: 0, recurrent: false, enabled: true}
+    - {src_id: 2,  tgt_id: 3,  weight: 0.0, trait_id: 1, innov_num: 2,  mut_num: 0, recurrent: false, enabled: true}
+    # Hidden-to-output
+    - {src_id: 3,  tgt_id: 4,  weight: 0.0, trait_id: 1, innov_num: 12,  mut_num: 0, recurrent: false, enabled: true}
+    - {src_id: 3,  tgt_id: 5,  weight: 0.0, trait_id: 1, innov_num: 13,  mut_num: 0, recurrent: false, enabled: true}

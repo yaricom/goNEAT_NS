@@ -43,7 +43,7 @@ func (e *objectiveEvaluator) TrialRunStarted(trial *experiment.Trial) {
 	trialSim = mazeSimResults{
 		trialID: trial.Id,
 		records: new(RecordStore),
-		archive: neatns.NewNoveltyArchive(archiveThresh, noveltyMetric, neatns.DefaultNoveltyArchiveOptions()),
+		archive: neatns.NewNoveltyArchive(archiveThresh, NoveltyMetric, neatns.DefaultNoveltyArchiveOptions()),
 	}
 }
 

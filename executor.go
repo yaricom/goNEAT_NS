@@ -21,8 +21,10 @@ func main() {
 	var outDirPath = flag.String("out", "./out", "The output directory to store results.")
 	var contextPath = flag.String("context", "./data/maze.neat", "The execution context configuration file.")
 	var genomePath = flag.String("genome", "./data/mazestartgenes", "The seed genome to start with.")
+	var safeGenomePath = flag.String("safe_genome", "./data/safeobjfuncstartgenes.yml", "The obj functions seed genome to start with.")
+	var safeContextPath = flag.String("safe_context", "./data/safe.yml", "The SAFE execution context configuration file.")
 	var mazeConfigPath = flag.String("maze", "./data/medium_maze.txt", "The maze environment configuration file.")
-	var experimentName = flag.String("experiment", "MAZENS", "The name of experiment to run. [MAZENS, MAZEOBJ]")
+	var experimentName = flag.String("experiment", "MAZENS", "The name of experiment to run. [MAZENS, MAZEOBJ, MAZESAFE]")
 	var timeSteps = flag.Int("timesteps", 400, "The number of time steps for maze simulation per organism.")
 	var timeStepsSample = flag.Int("timesteps_sample", 1000, "The sample size to store agent path when doing maze simulation.")
 	var speciesTarget = flag.Int("species_target", 20, "The target number of species to maintain.")
@@ -114,6 +116,9 @@ func main() {
 	} else if *experimentName == "MAZEOBJ" {
 		generationEvaluator, trialObserver = maze.NewMazeObjectiveEvaluator(
 			outDir, environment, *speciesTarget, *speciesCompatAdjustFreq)
+	} else if *experimentName == "MAZESAFE" {
+		generationEvaluator, trialObserver = createSafeEvaluator(
+			*safeGenomePath, *safeContextPath, outDir, environment, *speciesTarget, *speciesCompatAdjustFreq)
 	} else {
 		log.Fatalf("Unsupported experiment name requested: %s\n", *experimentName)
 	}
@@ -180,4 +185,28 @@ func main() {
 	} else if err = expt.WriteNPZ(npzResFile); err != nil {
 		log.Fatal("Failed to save experiment results as NPZ file", err)
 	}
+}
+
+func createSafeEvaluator(
+	safeGenomePath, safeContextPath, outDir string, environment *maze.Environment, speciesTarget, speciesCompatAdjustFreq int,
+) (experiment.GenerationEvaluator, experiment.TrialRunObserver) {
+	// Load NEAT options for SAFE
+	safeOptions, err := neat.ReadNeatOptionsFromFile(safeContextPath)
+	if err != nil {
+		log.Fatal("Failed to load NEAT SAFE options: ", err)
+	}
+
+	// Load Genome
+	log.Printf("Loading start genome for SAFE population experiment from file '%s'\n", safeGenomePath)
+	reader, err := genetics.NewGenomeReaderFromFile(safeGenomePath)
+	if err != nil {
+		log.Fatalf("Failed to open SAFE genome file, reason: '%s'", err)
+	}
+	startGenome, err := reader.Read()
+	if err != nil {
+		log.Fatalf("Failed to read SAFE start genome, reason: '%s'", err)
+	}
+	fmt.Println(startGenome)
+
+	return maze.NewSafeNSEvaluator(outDir, environment, startGenome, safeOptions, speciesTarget, speciesCompatAdjustFreq)
 }

@@ -16,12 +16,6 @@ import (
 // The initial novelty threshold for Novelty Archive
 const archiveThresh = 6.0
 
-// the novelty metric function for maze simulation
-var noveltyMetric neatns.NoveltyMetric = func(x, y *neatns.NoveltyItem) float64 {
-	diff := histDiff(x.Data, y.Data)
-	return diff
-}
-
 // NewNoveltySearchEvaluator allows creating maze solving agent based on Novelty Search optimization.
 // It will use provided MazeEnv to run simulation of the maze environment. The numSpeciesTarget specifies the
 // target number of species to maintain in the population. If the number of species differ from the numSpeciesTarget it
@@ -55,7 +49,7 @@ func (e *noveltySearchEvaluator) TrialRunStarted(trial *experiment.Trial) {
 	trialSim = mazeSimResults{
 		trialID: trial.Id,
 		records: new(RecordStore),
-		archive: neatns.NewNoveltyArchive(archiveThresh, noveltyMetric, opts),
+		archive: neatns.NewNoveltyArchive(archiveThresh, NoveltyMetric, opts),
 	}
 }
 

@@ -168,7 +168,7 @@ func mazeSimulationStep(env *Environment, phenotype *network.Network, netDepth i
 
 	// use the net's outputs to change heading and velocity of maze agent
 	if err := env.ApplyOutputs(phenotype.Outputs[0].Activation, phenotype.Outputs[1].Activation); err != nil {
-		neat.ErrorLog("Failed to apply outputs")
+		neat.ErrorLog(fmt.Sprintf("Failed to apply outputs: %s", err))
 		return err
 	}
 
@@ -195,4 +195,10 @@ func adjustSpeciesNumber(speciesCount, epochId, adjustFrequency, numberSpeciesTa
 			options.CompatThreshold = compatibilityThresholdMinValue
 		}
 	}
+}
+
+// NoveltyMetric the novelty metric function for maze simulation
+var NoveltyMetric neatns.NoveltyMetric = func(x, y *neatns.NoveltyItem) float64 {
+	diff := histDiff(x.Data, y.Data)
+	return diff
 }
