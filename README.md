@@ -585,6 +585,24 @@ go run tools/maze_utils.go -records [records_file] -maze [maze_file] -out [out_f
 7. Iaroslav Omelianenko, [Neuroevolution - evolving Artificial Neural Networks topology from the scratch][7], Medium, 2018
 8. Iaroslav Omelianenko, [The GoLang NEAT implementation][3], GitHub, 2018
 
+## Citing
+
+If you find our work useful, please consider citing:
+
+```text
+@software{omelianenko_iaroslav_2024_10951521,
+  author       = {Omelianenko, Iaroslav},
+  title        = {{The GOLang implementation of Neuro-Evolution of Augmenting Topologies (NEAT) with Novelty Search optimization}},
+  month        = apr,
+  year         = 2024,
+  note         = {If you use this software, please cite it as below.},
+  publisher    = {Zenodo},
+  version      = {v4.0.2},
+  doi          = {10.5281/zenodo.10951521},
+  url          = {https://doi.org/10.5281/zenodo.10951521}
+}
+```
+
 This source code maintained and managed by [Iaroslav Omelianenko][6]
 
 <a href="https://www.buymeacoffee.com/io42"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=io42&button_colour=be38f3&font_colour=ffffff&font_family=Comic&outline_colour=ffffff&coffee_colour=FFDD00"></a>
