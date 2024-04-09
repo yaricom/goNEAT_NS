@@ -28,17 +28,20 @@ func main() {
 	var timeSteps = flag.Int("timesteps", 400, "The number of time steps for maze simulation per organism.")
 	var timeStepsSample = flag.Int("timesteps_sample", 1000, "The sample size to store agent path when doing maze simulation.")
 	var speciesTarget = flag.Int("species_target", 20, "The target number of species to maintain.")
-	var speciesCompatAdjustFreq = flag.Int("species_adjust_freq", 10, "The frequency of species compatibility theshold adjustments when trying to maintain their number.")
+	var speciesCompatAdjustFreq = flag.Int("species_adjust_freq", 10, "The frequency of species compatibility threshold adjustments when trying to maintain their number.")
 	var trialsCount = flag.Int("trials", 0, "The number of trials for experiment. Overrides the one set in configuration.")
 	var logLevel = flag.String("log_level", "", "The logger level to be used. Overrides the one set in configuration.")
 	var exitRange = flag.Float64("exit_range", 5.0, "The range around maze exit point to test if agent coordinates is within to be considered as solved successfully")
+	var seed = flag.Int64("seed", -1, "The seed for the random number generator [-1 to use current Unix timestamp].")
 
 	flag.Parse()
 
 	// Seed the random-number generator with current time so that
 	// the numbers will be different every time we run.
-	seed := time.Now().Unix()
-	rand.Seed(seed)
+	if *seed < 0 {
+		*seed = time.Now().UnixNano()
+	}
+	rand.Seed(*seed)
 
 	// Load NEAT options
 	neatOptions, err := neat.ReadNeatOptionsFromFile(*contextPath)
@@ -106,7 +109,7 @@ func main() {
 	expt := experiment.Experiment{
 		Id:       0,
 		Trials:   make(experiment.Trials, neatOptions.NumRuns),
-		RandSeed: seed,
+		RandSeed: *seed,
 	}
 	var generationEvaluator experiment.GenerationEvaluator
 	var trialObserver experiment.TrialRunObserver
@@ -167,6 +170,8 @@ func main() {
 	fmt.Printf(">>> Start genome file:  %s\n", *genomePath)
 	fmt.Printf(">>> Configuration file: %s\n", *contextPath)
 	fmt.Printf(">>> Maze environment file: %s\n", *mazeConfigPath)
+
+	fmt.Printf("\n>>> Random seed: %d\n", *seed)
 
 	// Save experiment data in native format
 	//
