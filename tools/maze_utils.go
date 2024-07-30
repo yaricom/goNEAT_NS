@@ -245,6 +245,7 @@ func main() {
 	var bestThreshold = flag.Float64("b_thresh", 0.8, "The minimal fitness of maze solving agent's species to be considered as the best ones.")
 	var operation = flag.String("operation", "draw_agents", "The name of operation to apply to the records [draw_agents, draw_path].")
 	var groupByAge = flag.Bool("group_by_age", false, "The flag to indicate whether agent records should be grouped by age of species")
+	var scale = flag.Float64("scale", 1.0, "The scale factor for produced graphics")
 
 	flag.Parse()
 
@@ -268,7 +269,13 @@ func main() {
 		log.Fatalf("Failed to open maze config file: %s\n", *mazePath)
 	}
 
-	dc := gg.NewContext(*width, *height)
+	contextWidth := float64(*width) * *scale
+	contextHeight := float64(*height) * *scale
+	dc := gg.NewContext(int(contextWidth), int(contextHeight))
+	// scale renderings if needed
+	if *scale != 1.0 {
+		dc.Scale(*scale, *scale)
+	}
 
 	// set background
 	dc.SetColor(color.White)
