@@ -5,8 +5,8 @@ go 1.21
 require (
 	github.com/fogleman/gg v1.3.0
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.4
-	github.com/yaricom/goNEAT/v4 v4.0.2
+	github.com/stretchr/testify v1.10.0
+	github.com/yaricom/goNEAT/v4 v4.2.1
 )
 
 require (
